@@ -26,6 +26,7 @@
 	var/obj/screen/action_intent
 	var/obj/screen/move_intent
 	var/obj/screen/module_store_icon
+	var/obj/screen/combo/combo_object
 
 	var/list/static_inventory = list()		//the screen objects which are static
 	var/list/toggleable_inventory = list()	//the screen objects which can be hidden
