@@ -206,6 +206,11 @@
 		if(G.affecting.buckled)
 			to_chat(user, "<span class='warning'>[G.affecting] is buckled to [G.affecting.buckled]!</span>")
 			return 0
+		if(ishuman(user))
+			var/mob/living/carbon/human/H = user
+			var/datum/martial_art/attacker_style = H.martial_art
+			if(attacker_style && attacker_style.tablepush_act(user, G.affecting, G, src))
+				return 0
 		if(G.state < GRAB_AGGRESSIVE)
 			to_chat(user, "<span class='warning'>You need a better grip to do that!</span>")
 			return 0
