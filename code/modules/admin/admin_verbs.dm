@@ -113,7 +113,7 @@ var/list/admin_verbs_event = list(
 	)
 
 var/list/admin_verbs_spawn = list(
-	/datum/admins/proc/spawn_atom,		/*allows us to spawn instances*/
+	/datum/admins/proc/spawn_atom,			/*allows us to spawn instances*/
 	/client/proc/respawn_character,
 	/client/proc/admin_deserialize
 	)
@@ -127,7 +127,7 @@ var/list/admin_verbs_server = list(
 	/client/proc/toggle_log_hrefs,
 	/client/proc/everyone_random,
 	/datum/admins/proc/toggleAI,
-	/client/proc/cmd_admin_delete,		/*delete an instance/object/mob/etc*/
+	/client/proc/cmd_admin_delete,			/*delete an instance/object/mob/etc*/
 	/client/proc/cmd_debug_del_all,
 	/client/proc/cmd_debug_del_sing,
 	/datum/admins/proc/toggle_aliens,
@@ -179,24 +179,25 @@ var/list/admin_verbs_rejuv = list(
 	/client/proc/cmd_admin_rejuvenate
 	)
 var/list/admin_verbs_mod = list(
-	/client/proc/cmd_admin_pm_context,	/*right-click adminPM interface*/
-	/client/proc/cmd_admin_pm_panel,	/*admin-pm list*/
+	/client/proc/cmd_admin_pm_context,		/*right-click adminPM interface*/
+	/client/proc/cmd_admin_pm_panel,		/*admin-pm list*/
 	/client/proc/cmd_admin_pm_by_key_panel,	/*admin-pm list by key*/
 	/datum/admins/proc/PlayerNotes,
-	/client/proc/admin_ghost,			/*allows us to ghost/reenter body at will*/
+	/client/proc/admin_ghost,				/*allows us to ghost/reenter body at will*/
 	/client/proc/cmd_mentor_say,
 	/datum/admins/proc/show_player_notes,
 	/client/proc/player_panel_new,
 	/client/proc/dsay,
 	/datum/admins/proc/show_player_panel,
 	/client/proc/jobbans,
-	/client/proc/debug_variables		/*allows us to -see- the variables of any instance in the game. +VAREDIT needed to modify*/
+	/client/proc/debug_variables			/*allows us to -see- the variables of any instance in the game. +VAREDIT needed to modify*/
+	/client/proc/cmd_admin_say
 )
 var/list/admin_verbs_mentor = list(
-	/client/proc/cmd_admin_pm_context,	/*right-click adminPM interface*/
-	/client/proc/cmd_admin_pm_panel,	/*admin-pm list*/
-	/client/proc/cmd_admin_pm_by_key_panel	/*admin-pm list by key*/
-	// cmd_mentor_say is added/removed by the toggle_mentor_chat verb
+	/client/proc/cmd_admin_pm_context,		/*right-click adminPM interface*/
+	/client/proc/cmd_admin_pm_panel,		/*admin-pm list*/
+	/client/proc/cmd_admin_pm_by_key_panel,	/*admin-pm list by key*/
+	/client/proc/cmd_admin_say
 )
 var/list/admin_verbs_proccall = list(
 	/client/proc/callproc,
