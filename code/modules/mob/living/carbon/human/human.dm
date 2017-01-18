@@ -2062,9 +2062,7 @@
 	data["age"] = age
 
 	// No being naked
-	data["ushirt"] = undershirt
 	data["socks"] = socks
-	data["uwear"] = underwear
 
 	// Limbs
 	for(var/limb in organs_by_name)
@@ -2103,8 +2101,6 @@
 		name = real_name
 		set_species(dna.species)
 	age = data["age"]
-	undershirt = data["ushirt"]
-	underwear = data["uwear"]
 	socks = data["socks"]
 	for(var/obj/item/organ/internal/iorgan in internal_organs)
 		qdel(iorgan)

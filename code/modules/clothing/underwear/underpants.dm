@@ -88,7 +88,6 @@
 /obj/item/clothing/underwear/underpants/female_whitealt
 	name = "Ladies White Alt"
 	icon_state = "female_whitealt"
-	use_gender = FEMALE
 	item_state = "lgloves"
 
 /obj/item/clothing/underwear/underpants/female_yellow
