@@ -62,6 +62,10 @@
 			return has_organ("r_foot") && has_organ("l_foot")
 		if(slot_wear_suit)
 			return has_organ("chest")
+		if(slot_underpants)
+			return has_organ("chest") && has_organ("l_leg") && has_organ("r_leg")
+		if(slot_undershirt)
+			return has_organ("chest")
 		if(slot_w_uniform)
 			return has_organ("chest")
 		if(slot_l_store)
@@ -106,6 +110,12 @@
 			unEquip(belt)
 		w_uniform = null
 		update_inv_w_uniform()
+	else if(I == underpants)
+		underpants = null
+		update_inv_underwear()
+	else if(I == undershirt)
+		undershirt = null
+		update_inv_underwear()
 	else if(I == gloves)
 		gloves = null
 		update_inv_gloves()
@@ -296,6 +306,12 @@
 		if(slot_w_uniform)
 			w_uniform = W
 			update_inv_w_uniform(redraw_mob)
+		if(slot_underpants)
+			underpants = W
+			update_inv_underwear(redraw_mob)
+		if(slot_undershirt)
+			undershirt = W
+			update_inv_underwear(redraw_mob)
 		if(slot_l_store)
 			l_store = W
 			update_inv_pockets(redraw_mob)
@@ -360,6 +376,10 @@
 			return wear_suit
 		if(slot_w_uniform)
 			return w_uniform
+		if(slot_underpants)
+			return underpants
+		if(slot_undershirt)
+			return undershirt
 		if(slot_l_store)
 			return l_store
 		if(slot_r_store)
@@ -387,7 +407,9 @@
 		wear_pda,
 		l_store,
 		r_store,
-		w_uniform
+		w_uniform,
+		underpants,
+		undershirt
 		)
 
 /mob/living/carbon/human/proc/get_head_slots()
@@ -511,6 +533,18 @@
 			if(w_uniform)
 				return 0
 			if(!(I.slot_flags & SLOT_ICLOTHING))
+				return 0
+			return 1
+		if(slot_underpants)
+			if(underpants)
+				return 0
+			if(!istype(I, /obj/item/clothing/underwear/underpants))
+				return 0
+			return 1
+		if(slot_undershirt)
+			if(undershirt)
+				return 0
+			if(!istype(I, /obj/item/clothing/underwear/undershirt))
 				return 0
 			return 1
 		if(slot_wear_id)

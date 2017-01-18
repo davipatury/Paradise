@@ -10,21 +10,11 @@ proc/GetOppositeDir(var/dir)
 		if(SOUTHEAST) return NORTHWEST
 	return 0
 
-proc/random_underwear(gender, species = "Human")
-	var/list/pick_list = list()
-	switch(gender)
-		if(MALE)	pick_list = underwear_m
-		if(FEMALE)	pick_list = underwear_f
-		else		pick_list = underwear_list
-	return pick_species_allowed_underwear(pick_list, species)
+proc/random_underwear(species = "Human")
+	return pick_species_allowed_underwear_obj(underwear_list, species)
 
-proc/random_undershirt(gender, species = "Human")
-	var/list/pick_list = list()
-	switch(gender)
-		if(MALE)	pick_list = undershirt_m
-		if(FEMALE)	pick_list = undershirt_f
-		else		pick_list = undershirt_list
-	return pick_species_allowed_underwear(pick_list, species)
+proc/random_undershirt(species = "Human")
+	return pick_species_allowed_underwear_obj(underwear_list, species)
 
 proc/random_socks(gender, species = "Human")
 	var/list/pick_list = list()
@@ -33,6 +23,18 @@ proc/random_socks(gender, species = "Human")
 		if(FEMALE)	pick_list = socks_f
 		else		pick_list = socks_list
 	return pick_species_allowed_underwear(pick_list, species)
+
+proc/pick_species_allowed_underwear_obj(list/all_picks, species)
+	var/list/valid_picks = list()
+	for(var/test in all_picks)
+		var/obj/item/clothing/O = all_picks[test]
+		if(!O.species_restricted || !O.species_restricted.len || species in O.species_restricted)
+			valid_picks += O.name
+
+	if(!valid_picks.len)
+		valid_picks += "Nude"
+
+	return pick(valid_picks)
 
 proc/pick_species_allowed_underwear(list/all_picks, species)
 	var/list/valid_picks = list()
