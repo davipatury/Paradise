@@ -98,7 +98,7 @@
 	inv_box = new /obj/screen/inventory()
 	inv_box.name = "underpants"
 	inv_box.icon = ui_style
-	inv_box.icon_state = "underpants"
+	inv_box.icon_state = "uniform"
 	inv_box.screen_loc = ui_underpants
 	inv_box.slot_id = slot_underpants
 	inv_box.color = ui_color
@@ -108,7 +108,7 @@
 	inv_box = new /obj/screen/inventory()
 	inv_box.name = "undershirt"
 	inv_box.icon = ui_style
-	inv_box.icon_state = "undershirt"
+	inv_box.icon_state = "uniform"
 	inv_box.screen_loc = ui_undershirt
 	inv_box.slot_id = slot_undershirt
 	inv_box.color = ui_color

@@ -12,6 +12,7 @@
 		qdel(I)
 		to_chat(user, "<span class='notice'>You put [I] into [src].</span>")
 		return
+	..()
 
 /obj/structure/dresser/attack_hand(mob/user)
 	if(!Adjacent(user))//no tele-grooming

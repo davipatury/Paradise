@@ -1,9 +1,13 @@
-/obj/item/clothing/underwear/underpants/New()
+/obj/item/clothing/underwear/undershirt/New()
 	..()
 	icon_state = "us_[icon_state]_s"
 
 /obj/item/clothing/underwear/undershirt/nude
 	name = "Nude"
+
+/obj/item/clothing/underwear/undershirt/nude/New()
+	..()
+	icon_state = "nude"
 
 /obj/item/clothing/underwear/undershirt/shirt_white
 	name = "White Shirt"

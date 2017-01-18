@@ -5,6 +5,10 @@
 /obj/item/clothing/underwear/underpants/nude
 	name = "Nude"
 
+/obj/item/clothing/underwear/underpants/nude/New()
+	..()
+	icon_state = "nude"
+
 /obj/item/clothing/underwear/underpants/male_white
 	name = "Mens White"
 	icon_state = "male_white"

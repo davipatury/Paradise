@@ -718,9 +718,9 @@ var/global/list/damage_icon_parts = list()
 
 			if(istype(undershirt))
 				underwear_standing.Blend(new /icon('icons/mob/underwear.dmi', undershirt.icon_state), ICON_OVERLAY)
-		overlays_standing[UNDERWEAR_LAYER] = image(underwear_standing)
-	else
-		overlays_standing[UNDERWEAR_LAYER] = null
+
+	overlays_standing[UNDERWEAR_LAYER] = image(underwear_standing)
+
 	if(update_icons)
 		update_icons()
 
