@@ -28,11 +28,11 @@ proc/pick_species_allowed_underwear_obj(list/all_picks, species)
 	var/list/valid_picks = list()
 	for(var/test in all_picks)
 		var/obj/item/clothing/O = all_picks[test]
-		if(species in O.species_restricted || !O.species_restricted.len)
+		if(!O.species_restricted || !O.species_restricted.len || species in O.species_restricted)
 			valid_picks += O.name
 
 	if(!valid_picks.len)
-		return null
+		valid_picks += "Nude"
 
 	return pick(valid_picks)
 
