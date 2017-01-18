@@ -36,7 +36,7 @@
 		return 1
 	return 0
 
-//Puts the item into your r_hand if possible and calls all necessary triggers/updates. returns 1 on success.
+//Puts the item into your r_hand if possible and calls allg necessary triggers/updates. returns 1 on success.
 /mob/proc/put_in_r_hand(var/obj/item/W)
 	if(!put_in_hand_check(W))
 		return 0
@@ -153,9 +153,11 @@
 	if(hasvar(src,"wear_id")) if(src:wear_id) items += src:wear_id
 	if(hasvar(src,"wear_mask")) if(src:wear_mask) items += src:wear_mask
 	if(hasvar(src,"wear_suit")) if(src:wear_suit) items += src:wear_suit
-//	if(hasvar(src,"w_radio")) if(src:w_radio) items += src:w_radio  commenting this out since headsets go on your ears now PLEASE DON'T BE MAD KEELIN
 	if(hasvar(src,"w_uniform")) if(src:w_uniform) items += src:w_uniform
+	if(hasvar(src,"underpants")) if(src:underpants) items += src:underpants
+	if(hasvar(src,"undershirt")) if(src:undershirt) items += src:undershirt
 
+	//if(hasvar(src,"w_radio")) if(src:w_radio) items += src:w_radio // commenting this out since headsets go on your ears now PLEASE DON'T BE MAD KEELIN
 	//if(hasvar(src,"l_hand")) if(src:l_hand) items += src:l_hand
 	//if(hasvar(src,"r_hand")) if(src:r_hand) items += src:r_hand
 
