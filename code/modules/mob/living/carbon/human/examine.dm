@@ -15,6 +15,8 @@
 		skipjumpsuit = wear_suit.flags_inv & HIDEJUMPSUIT
 		skipshoes = wear_suit.flags_inv & HIDESHOES
 
+	skipunderwear = (skipjumpsuit || (w_uniform && !(w_uniform.flags & SHOWUNDERWEAR)))
+
 	if(head)
 		skipmask = head.flags_inv & HIDEMASK
 		skipeyes = head.flags_inv & HIDEEYES
@@ -69,6 +71,13 @@
 		msg += ", a unathi!\n"
 	else
 		msg += ", \a [lowertext(displayed_species)]!\n"
+
+	//underwear
+	if(!skipunderwear)
+		if(undershirt)
+			msg += "[t_He] [t_is] wearing [bicon(undershirt)] \a [undershirt].\n"
+		if(underpants)
+			msg += "[t_He] [t_is] wearing [bicon(underpants)] \a [underpants].\n"
 
 	//uniform
 	if(w_uniform && !skipjumpsuit && !(w_uniform.flags & ABSTRACT))
@@ -495,6 +504,12 @@
 
 
 	if(print_flavor_text()) msg += "[print_flavor_text()]\n"
+
+	if(is_nude() && species.genitals)
+		if(has_penis())
+			msg += "<span class='info'>\n<span class='erp'>Penis size: [penis_size] cm.</span>\n"
+		else if(has_vagina() && virgin)
+			msg += "<span class='info'>\n<span class='erp'>[t_He] is a virgin!</span>\n"
 
 	msg += "*---------*</span>"
 	if(pose)
