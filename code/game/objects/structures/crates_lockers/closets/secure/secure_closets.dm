@@ -108,12 +108,13 @@
 /obj/structure/closet/secure_closet/AltClick(mob/user)
 	if(opened)
 		return
-	if(user.incapacitated())
+	if(user.incapacitated() || user.stat || !user.canmove || user.restrained())
 		to_chat(user, "<span class='warning'>You can't do that right now!</span>")
 		return
 	if(!Adjacent(user))
 		return
-	verb_togglelock()
+	if(ishuman(user))
+		togglelock(user)
 
 /obj/structure/closet/secure_closet/emag_act(mob/user)
 	if(!broken)
