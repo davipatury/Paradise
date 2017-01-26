@@ -25,7 +25,7 @@
  * UI
  */
 
-/mob/living/carbon/human/MouseDrop_T(mob/living/carbon/human/target, mob/living/carbon/human/user, datum/topic_state/state = default_state)
+/mob/living/carbon/human/MouseDrop_T(mob/living/carbon/human/target, mob/living/carbon/human/user)
 	// User drag himself to [src]
 	if(istype(target) && istype(user))
 		if(user == target && get_dist(user, src) <= 1)
@@ -33,12 +33,12 @@
 	return ..()
 
 /mob/living/carbon/human/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
-	ui = nanomanager.try_update_ui(user, src, ui_key, ui, data, force_open)
+	ui = nanomanager.try_update_ui(user, src, ui_key, ui, force_open)
 	if(!ui)
 		ui = new(user, src, ui_key, "erp.tmpl", "Forbidden Fruits", 450, 550, ignore_status = 1)
 		ui.open()
 
-/mob/living/silicon/human/ui_data(mob/living/carbon/human/user, ui_key = "main", datum/topic_state/state = default_state)
+/mob/living/silicon/human/ui_data(mob/living/carbon/human/user, ui_key = "main")
 	var/data[0]
 	var/list/penis_actions = list()
 	var/list/vagina_actions = list()
