@@ -7,6 +7,8 @@
 	opened = 0
 	var/locked = 1
 	var/broken = 0
+	var/panel_open = 0
+	var/l_hacking = 0
 	var/large = 1
 	icon_closed = "secure"
 	var/icon_locked = "secure1"
@@ -66,14 +68,14 @@
 	else
 		to_chat(user, "<span class='notice'>Access Denied</span>")
 
-/obj/structure/closet/secure_closet/attackby(obj/item/weapon/W as obj, mob/user as mob, params)
+/obj/structure/closet/secure_closet/attackby(obj/item/weapon/W, mob/user, params)
 	if(istype(W, /obj/item/weapon/rcs))
 		return ..()
 
-	if(src.opened)
+	if(opened)
 		if(istype(W, /obj/item/weapon/grab))
-			if(src.large)
-				src.MouseDrop_T(W:affecting, user)	//act like they were dragged onto the closet
+			if(large)
+				MouseDrop_T(W:affecting, user)	//act like they were dragged onto the closet
 			else
 				to_chat(user, "<span class='notice'>The locker is too small to stuff [W:affecting] into!</span>")
 		if(isrobot(user))
@@ -81,14 +83,40 @@
 		user.drop_item()
 		if(W)
 			W.forceMove(loc)
-	else if((istype(W, /obj/item/weapon/card/emag)||istype(W, /obj/item/weapon/melee/energy/blade)) && !broken)
+	else if((istype(W, /obj/item/weapon/card/emag) || istype(W, /obj/item/weapon/melee/energy/blade)) && !broken)
 		emag_act(user)
-	else if(istype(W,/obj/item/stack/packageWrap) || istype(W,/obj/item/weapon/weldingtool))
-		return ..(W,user)
+	else if(istype(W, /obj/item/stack/packageWrap) || istype(W, /obj/item/weapon/weldingtool))
+		return ..(W, user)
+	else if(istype(W, /obj/item/weapon/screwdriver))
+		panel_open = !panel_open
+		to_chat(user, "<span class='notice'>You [panel_open ? "open" : "close"] the service panel.</span>")
+	else if(istype(W, /obj/item/device/multitool) && panel_open && !l_hacking)
+		to_chat(user, "<span class='danger'>Now attempting to reset internal memory, please hold.</span>")
+		l_hacking = 1
+		if(do_after(user, 100, target = src))
+			if(prob(40))
+				to_chat(user, "<span class='danger'>Internal memory reset.  Please give it a few seconds to reinitialize.</span>")
+				sleep(80)
+				locked = 0
+				update_icon()
+			else
+				to_chat(user, "<span class='danger'>Unable to reset internal memory.</span>")
+		l_hacking = 0
 	else
 		togglelock(user)
 
-/obj/structure/closet/secure_closet/emag_act(user as mob)
+/obj/structure/closet/secure_closet/AltClick(mob/user)
+	if(opened)
+		return
+	if(user.incapacitated() || user.stat || !user.canmove || user.restrained())
+		to_chat(user, "<span class='warning'>You can't do that right now!</span>")
+		return
+	if(!Adjacent(user))
+		return
+	if(ishuman(user))
+		togglelock(user)
+
+/obj/structure/closet/secure_closet/emag_act(mob/user)
 	if(!broken)
 		broken = 1
 		locked = 0
@@ -97,12 +125,12 @@
 		flick(icon_broken, src)
 		to_chat(user, "<span class='notice'>You unlock \the [src].</span>")
 
-/obj/structure/closet/secure_closet/attack_hand(mob/user as mob)
-	src.add_fingerprint(user)
-	if(src.locked)
-		src.togglelock(user)
+/obj/structure/closet/secure_closet/attack_hand(mob/user)
+	add_fingerprint(user)
+	if(locked)
+		togglelock(user)
 	else
-		src.toggle(user)
+		toggle(user)
 
 /obj/structure/closet/secure_closet/verb/verb_togglelock()
 	set src in oview(1) // One square distance
@@ -113,8 +141,8 @@
 		return
 
 	if(ishuman(usr))
-		src.add_fingerprint(usr)
-		src.togglelock(usr)
+		add_fingerprint(usr)
+		togglelock(usr)
 	else
 		to_chat(usr, "<span class='warning'>This mob type can't use this verb.</span>")
 
@@ -130,7 +158,7 @@
 	else
 		icon_state = icon_opened
 
-/obj/structure/closet/secure_closet/container_resist(var/mob/living/L)
+/obj/structure/closet/secure_closet/container_resist(mob/living/L)
 	var/breakout_time = 2 //2 minutes by default
 	if(opened)
 		if(L.loc == src)
