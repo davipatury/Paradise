@@ -3,7 +3,7 @@
  * EMOTE DECLARATION
  *
  */
-
+var/global/list/forbidden_emotes = list()	// stores /datum/forbidden/action/emote indexed by name
 
 /datum/forbidden/emote
 	var/name

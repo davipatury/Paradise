@@ -3,6 +3,7 @@
  * ACTION DECLARATION
  *
  */
+var/global/list/forbidden_actions = list()	// stores /datum/forbidden/action indexed by name
 
 /datum/forbidden/action
 	var/name
