@@ -10,6 +10,9 @@
 	max_combined_w_class = 4
 	silent = 1
 
+/mob/living/carbon/human
+	var/obj/item/weapon/storage/ass/ass_storage = new
+
 /mob/living/carbon/human/attackby(obj/item/I, mob/user, params)
 	if(ishuman(user))
 		var/mob/living/carbon/human/H = user
