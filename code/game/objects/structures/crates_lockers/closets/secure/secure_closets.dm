@@ -105,6 +105,16 @@
 	else
 		togglelock(user)
 
+/obj/structure/closet/secure_closet/AltClick(mob/user)
+	if(opened)
+		return
+	if(user.incapacitated())
+		to_chat(user, "<span class='warning'>You can't do that right now!</span>")
+		return
+	if(!Adjacent(user))
+		return
+	verb_togglelock()
+
 /obj/structure/closet/secure_closet/emag_act(mob/user)
 	if(!broken)
 		broken = 1
@@ -115,11 +125,11 @@
 		to_chat(user, "<span class='notice'>You unlock \the [src].</span>")
 
 /obj/structure/closet/secure_closet/attack_hand(mob/user)
-	src.add_fingerprint(user)
-	if(src.locked)
-		src.togglelock(user)
+	add_fingerprint(user)
+	if(locked)
+		togglelock(user)
 	else
-		src.toggle(user)
+		toggle(user)
 
 /obj/structure/closet/secure_closet/verb/verb_togglelock()
 	set src in oview(1) // One square distance
@@ -130,8 +140,8 @@
 		return
 
 	if(ishuman(usr))
-		src.add_fingerprint(usr)
-		src.togglelock(usr)
+		add_fingerprint(usr)
+		togglelock(usr)
 	else
 		to_chat(usr, "<span class='warning'>This mob type can't use this verb.</span>")
 
