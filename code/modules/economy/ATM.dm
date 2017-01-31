@@ -49,7 +49,7 @@ log transactions
 	if(linked_db && ( (linked_db.stat & NOPOWER) || !linked_db.activated ) )
 		linked_db = null
 		authenticated_account = null
-		src.visible_message("\red [bicon(src)] [src] buzzes rudely, \"Connection to remote database lost.\"")
+		visible_message("[bicon(src)]<span class='warning'>[src] buzzes rudely, \"Connection to remote database lost.\"</span>")
 		updateDialog()
 
 	if(ticks_left_timeout > 0)
@@ -79,7 +79,7 @@ log transactions
 
 /obj/machinery/atm/proc/reconnect_database()
 	for(var/obj/machinery/computer/account_database/DB in world) //Hotfix until someone finds out why it isn't in 'machines'
-		if( DB.z == src.z && !(DB.stat & NOPOWER) && DB.activated )
+		if(DB.z == z && !(DB.stat & NOPOWER) && DB.activated)
 			linked_db = DB
 			break
 
@@ -113,106 +113,57 @@ log transactions
 			authenticated_account.transaction_log.Add(T)
 
 			to_chat(user, "<span class='info'>You insert [C] into [src].</span>")
-			src.attack_hand(user)
+			attack_hand(user)
 			qdel(I)
 	else
 		..()
 
 /obj/machinery/atm/attack_hand(mob/user as mob)
-	if(istype(user, /mob/living/silicon))
-		to_chat(user, "\red Artificial unit recognized. Artificial units do not currently receive monetary compensation, as per Nanotrasen regulation #1005.")
+	if(issilicon(user))
+		to_chat(user, "<span class='warning'>Artificial unit recognized. Artificial units do not currently receive monetary compensation, as per Nanotrasen regulation #1005.</span>")
 		return
 	if(get_dist(src,user) <= 1)
 		add_fingerprint(user)
+		ui_interact(user)
 
-		//js replicated from obj/machinery/computer/card
-		var/dat = {"<h1>Nanotrasen Automatic Teller Machine</h1>
-			For all your monetary needs!<br>
-			<i>This terminal is</i> [machine_id]. <i>Report this code when contacting Nanotrasen IT Support</i><br/>
-			Card: <a href='?src=[UID()];choice=insert_card'>[held_card ? held_card.name : "------"]</a><br><br>"}
+/obj/machinery/atm/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+	ui = nanomanager.try_update_ui(user, src, ui_key, ui, force_open)
+	if (!ui)
+		ui = new(user, src, ui_key, "atm.tmpl", name, 550, 650)
+		ui.open()
 
-		if(ticks_left_locked_down > 0)
-			dat += "<span class='alert'>Maximum number of pin attempts exceeded! Access to this ATM has been temporarily disabled.</span>"
-		else if(authenticated_account)
-			switch(view_screen)
-				if(CHANGE_SECURITY_LEVEL)
-					dat += "Select a new security level for this account:<br><hr>"
-					var/text = "Zero - Either the account number or card is required to access this account. EFTPOS transactions will require a card and ask for a pin, but not verify the pin is correct."
-					if(authenticated_account.security_level != 0)
-						text = "<A href='?src=[UID()];choice=change_security_level;new_security_level=0'>[text]</a>"
-					dat += "[text]<hr>"
-					text = "One - An account number and pin must be manually entered to access this account and process transactions."
-					if(authenticated_account.security_level != 1)
-						text = "<A href='?src=[UID()];choice=change_security_level;new_security_level=1'>[text]</a>"
-					dat += "[text]<hr>"
-					text = "Two - In addition to account number and pin, a card is required to access this account and process transactions."
-					if(authenticated_account.security_level != 2)
-						text = "<A href='?src=[UID()];choice=change_security_level;new_security_level=2'>[text]</a>"
-					dat += {"[text]<hr><br>
-						<A href='?src=[UID()];choice=view_screen;view_screen=0'>Back</a>"}
-				if(VIEW_TRANSACTION_LOGS)
-					dat += {"<b>Transaction logs</b><br>
-						<A href='?src=[UID()];choice=view_screen;view_screen=0'>Back</a>
-						<table border=1 style='width:100%'>
-						<tr>
-						<td><b>Date</b></td>
-						<td><b>Time</b></td>
-						<td><b>Target</b></td>
-						<td><b>Purpose</b></td>
-						<td><b>Value</b></td>
-						<td><b>Source terminal ID</b></td>
-						</tr>"}
-					for(var/datum/transaction/T in authenticated_account.transaction_log)
-						dat += {"<tr>
-							<td>[T.date]</td>
-							<td>[T.time]</td>
-							<td>[T.target_name]</td>
-							<td>[T.purpose]</td>
-							<td>$[T.amount]</td>
-							<td>[T.source_terminal]</td>
-							</tr>"}
-					dat += "</table>"
-				if(TRANSFER_FUNDS)
-					dat += {"<b>Account balance:</b> $[authenticated_account.money]<br>
-						<A href='?src=[UID()];choice=view_screen;view_screen=0'>Back</a><br><br>
-						<form name='transfer' action='?src=[UID()]' method='get'>
-						<input type='hidden' name='src' value='[UID()]'>
-						<input type='hidden' name='choice' value='transfer'>
-						Target account number: <input type='text' name='target_acc_number' value='' style='width:200px; background-color:white;'><br>
-						Funds to transfer: <input type='text' name='funds_amount' value='' style='width:200px; background-color:white;'><br>
-						Transaction purpose: <input type='text' name='purpose' value='Funds transfer' style='width:200px; background-color:white;'><br>
-						<input type='submit' value='Transfer funds'><br>
-						</form>"}
-				else
-					dat += {"Welcome, <b>[authenticated_account.owner_name].</b><br/>
-						<b>Account balance:</b> $[authenticated_account.money]
-						<form name='withdrawal' action='?src=[UID()]' method='get'>
-						<input type='hidden' name='src' value='[UID()]'>
-						<input type='hidden' name='choice' value='withdrawal'>
-						<input type='text' name='funds_amount' value='' style='width:200px; background-color:white;'><input type='submit' value='Withdraw funds'><br>
-						</form>
-						<A href='?src=[UID()];choice=view_screen;view_screen=1'>Change account security level</a><br>
-						<A href='?src=[UID()];choice=view_screen;view_screen=2'>Make transfer</a><br>
-						<A href='?src=[UID()];choice=view_screen;view_screen=3'>View transaction log</a><br>
-						<A href='?src=[UID()];choice=balance_statement'>Print balance statement</a><br>
-						<A href='?src=[UID()];choice=logout'>Logout</a><br>"}
-		else if(linked_db)
-			dat += {"<form name='atm_auth' action='?src=[UID()]' method='get'>
-				<input type='hidden' name='src' value='[UID()]'>
-				<input type='hidden' name='choice' value='attempt_auth'>
-				<b>Account:</b> <input type='text' id='account_num' name='account_num' style='width:250px; background-color:white;'><br>
-				<b>PIN:</b> <input type='text' id='account_pin' name='account_pin' style='width:250px; background-color:white;'><br>
-				<input type='submit' value='Submit'><br>
-				</form>"}
-		else
-			dat += "<span class='warning'>Unable to connect to accounts database, please retry and if the issue persists contact Nanotrasen IT support.</span>"
-			reconnect_database()
+/obj/machinery/atm/ui_data(mob/user, ui_key = "main", datum/topic_state/state = default_state)
+	var/data[0]
+	data["src"] = UID()
+	data["view_screen"] = view_screen
+	data["machine_id"] = machine_id
+	data["held_card_name"] = held_card ? held_card.name : "------"
+	data["ticks_left_locked_down"] = ticks_left_locked_down
+	data["linked_db"] = linked_db
+	data["transaction_log"] = null
 
-		var/datum/browser/popup = new(user, "atm", name, 550, 650)
-		popup.set_content(dat)
-		popup.open(0)
-	else
-		user << browse(null,"window=atm")
+	data["authenticated_account"] = authenticated_account
+	if(authenticated_account)
+		data["owner_name"] = authenticated_account.owner_name
+		data["money"] = authenticated_account.money
+		data["security_level"] = authenticated_account.security_level
+
+		var/list/trx[0]
+		for(var/datum/transaction/T in authenticated_account.transaction_log)
+			trx.Add(list(list(\
+				"date" = T.date, \
+				"time" = T.time, \
+				"target_name" = T.target_name, \
+				"purpose" = T.purpose, \
+				"amount" = T.amount, \
+				"source_terminal" = T.source_terminal)))
+		if(trx.len > 0)
+			data["transaction_log"] = trx
+
+	data["zero_text"] = "Zero - Either the account number or card is required to access this account. EFTPOS transactions will require a card and ask for a pin, but not verify the pin is correct."
+	data["one_text"] = "One - An account number and pin must be manually entered to access this account and process transactions."
+	data["two_text"] = "Two - In addition to account number and pin, a card is required to access this account and process transactions."
+	return data
 
 /obj/machinery/atm/Topic(var/href, var/href_list)
 	if(href_list["choice"])
@@ -253,7 +204,7 @@ log transactions
 				if(linked_db)
 					// check if they have low security enabled
 					scan_user(usr)
-				
+
 					if(!ticks_left_locked_down && held_card)
 						var/tried_account_num = text2num(href_list["account_num"])
 						if(!tried_account_num)
@@ -280,11 +231,11 @@ log transactions
 										T.time = worldtime2text()
 										failed_account.transaction_log.Add(T)
 								else
-									to_chat(usr, "\red [bicon(src)] Incorrect pin/account combination entered, [max_pin_attempts - number_incorrect_tries] attempts remaining.")
+									to_chat(usr, "[bicon(src)]<span class='warning'>Incorrect pin/account combination entered, [max_pin_attempts - number_incorrect_tries] attempts remaining.</span>")
 									previous_account_number = tried_account_num
 									playsound(src, 'sound/machines/buzz-sigh.ogg', 50, 1)
 							else
-								to_chat(usr, "\red [bicon(src)] incorrect pin/account combination entered.")
+								to_chat(usr, "[bicon(src)]<span class='warning'>Incorrect pin/account combination entered.</span>")
 								number_incorrect_tries = 0
 						else
 							playsound(src, 'sound/machines/twobeep.ogg', 50, 1)
@@ -300,7 +251,7 @@ log transactions
 							T.time = worldtime2text()
 							authenticated_account.transaction_log.Add(T)
 
-							to_chat(usr, "\blue [bicon(src)] Access granted. Welcome user '[authenticated_account.owner_name].'")
+							to_chat(usr, "[bicon(src)]<span class='notice'>Access granted. Welcome user '[authenticated_account.owner_name].'</span>")
 
 						previous_account_number = tried_account_num
 			if("withdrawal")
@@ -313,7 +264,7 @@ log transactions
 
 						//remove the money
 						if(amount > 10000) // prevent crashes
-							to_chat(usr, "\blue The ATM's screen flashes, 'Maximum single withdrawl limit reached, defaulting to 10,000.'")
+							to_chat(usr, "<span class='notice'>The ATM's screen flashes, 'Maximum single withdrawl limit reached, defaulting to 10,000.'</span>")
 							amount = 10000
 						authenticated_account.money -= amount
 						withdraw_arbitrary_sum(amount)
@@ -332,11 +283,11 @@ log transactions
 			if("balance_statement")
 				if(authenticated_account)
 					if(world.timeofday < lastprint + PRINT_DELAY)
-						to_chat(usr, "<span class='notice'>The [src.name] flashes an error on its display.</span>")
+						to_chat(usr, "<span class='notice'>The [name] flashes an error on its display.</span>")
 						return
 					lastprint = world.timeofday
 					playsound(loc, "sound/goonstation/machines/printer_thermal.ogg", 50, 1)
-					var/obj/item/weapon/paper/R = new(src.loc)
+					var/obj/item/weapon/paper/R = new(loc)
 					R.name = "Account balance: [authenticated_account.owner_name]"
 					R.info = {"<b>NT Automated Teller Account Statement</b><br><br>
 						<i>Account holder:</i> [authenticated_account.owner_name]<br>
@@ -360,7 +311,7 @@ log transactions
 					playsound(loc, 'sound/items/polaroid2.ogg', 50, 1)
 			if("insert_card")
 				if(held_card)
-					held_card.loc = src.loc
+					held_card.forceMove(loc)
 					authenticated_account = null
 
 					if(ishuman(usr) && !usr.get_active_hand())
@@ -371,13 +322,11 @@ log transactions
 					var/obj/item/I = usr.get_active_hand()
 					if(istype(I, /obj/item/weapon/card/id))
 						usr.drop_item()
-						I.loc = src
+						I.forceMove(src)
 						held_card = I
 			if("logout")
 				authenticated_account = null
-				//usr << browse(null,"window=atm")
-
-	src.attack_hand(usr)
+	nanomanager.update_uis(src)
 
 //create the most effective combination of notes to make up the requested amount
 /obj/machinery/atm/proc/withdraw_arbitrary_sum(var/arbitrary_sum)
@@ -396,7 +345,7 @@ log transactions
 			if(I)
 				authenticated_account = attempt_account_access(I.associated_account_number)
 				if(authenticated_account)
-					to_chat(human_user, "\blue [bicon(src)] Access granted. Welcome user '[authenticated_account.owner_name].'")
+					to_chat(human_user, "[bicon(src)]<span class='notice'>Access granted. Welcome user '[authenticated_account.owner_name].'</span>")
 
 					//create a transaction log entry
 					var/datum/transaction/T = new()
@@ -406,5 +355,5 @@ log transactions
 					T.date = current_date_string
 					T.time = worldtime2text()
 					authenticated_account.transaction_log.Add(T)
-					
+
 					view_screen = NO_SCREEN

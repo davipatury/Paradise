@@ -59,49 +59,11 @@
 			linked_db = DB
 			break
 
-/obj/item/device/eftpos/attack_self(mob/user as mob)
+/obj/item/device/eftpos/attack_self(mob/user)
 	if(get_dist(src,user) <= 1)
+		ui_interact(user)
 
-		// AUTOFIXED BY fix_string_idiocy.py
-		// C:\Users\Rob\Documents\Projects\vgstation13\code\WorkInProgress\Cael_Aislinn\Economy\EFTPOS.dm:59: var/dat = "<b>[eftpos_name]</b><br>"
-		var/dat = {"<b>[eftpos_name]</b><br>
-<i>This terminal is</i> [machine_id]. <i>Report this code when contacting Nanotrasen IT Support</i><br>"}
-		// END AUTOFIX
-		if(transaction_locked)
-
-			// AUTOFIXED BY fix_string_idiocy.py
-			// C:\Users\Rob\Documents\Projects\vgstation13\code\WorkInProgress\Cael_Aislinn\Economy\EFTPOS.dm:59: dat += "<a href='?src=[UID()];choice=toggle_lock'>Reset[transaction_paid ? "" : " (authentication required)"]</a><br><br>"
-			dat += {"<a href='?src=[UID()];choice=toggle_lock'>Reset[transaction_paid ? "" : " (authentication required)"]</a><br><br>
-				Transaction purpose: <b>[transaction_purpose]</b><br>
-				Value: <b>$[transaction_amount]</b><br>
-				Linked account: <b>[linked_account ? linked_account.owner_name : "None"]</b><hr>"}
-			// END AUTOFIX
-			if(transaction_paid)
-				dat += "<i>This transaction has been processed successfully.</i><hr>"
-			else
-
-				// AUTOFIXED BY fix_string_idiocy.py
-				// C:\Users\Rob\Documents\Projects\vgstation13\code\WorkInProgress\Cael_Aislinn\Economy\EFTPOS.dm:67: dat += "<i>Swipe your card below the line to finish this transaction.</i><hr>"
-				dat += {"<i>Swipe your card below the line to finish this transaction.</i><hr>
-					<a href='?src=[UID()];choice=scan_card'>\[------\]</a>"}
-				// END AUTOFIX
-		else
-
-			// AUTOFIXED BY fix_string_idiocy.py
-			// C:\Users\Rob\Documents\Projects\vgstation13\code\WorkInProgress\Cael_Aislinn\Economy\EFTPOS.dm:70: dat += "<a href='?src=[UID()];choice=toggle_lock'>Lock in new transaction</a><br><br>"
-			dat += {"<a href='?src=[UID()];choice=toggle_lock'>Lock in new transaction</a><br><br>
-				Transaction purpose: <a href='?src=[UID()];choice=trans_purpose'>[transaction_purpose]</a><br>
-				Value: <a href='?src=[UID()];choice=trans_value'>$[transaction_amount]</a><br>
-				Linked account: <a href='?src=[UID()];choice=link_account'>[linked_account ? linked_account.owner_name : "None"]</a><hr>
-				<a href='?src=[UID()];choice=change_code'>Change access code</a><br>
-				<a href='?src=[UID()];choice=change_id'>Change EFTPOS ID</a><br>
-				Scan card to reset access code <a href='?src=[UID()];choice=reset'>\[------\]</a>"}
-			// END AUTOFIX
-		user << browse(dat,"window=eftpos")
-	else
-		user << browse(null,"window=eftpos")
-
-/obj/item/device/eftpos/attackby(O as obj, user as mob, params)
+/obj/item/device/eftpos/attackby(obj/O, mob/user, params)
 	if(istype(O, /obj/item/weapon/card))
 		//attempt to connect to a new db, and if that doesn't work then fail
 		if(!linked_db)
@@ -117,7 +79,29 @@
 	else
 		..()
 
-/obj/item/device/eftpos/Topic(var/href, var/href_list)
+/obj/item/device/eftpos/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+	ui = nanomanager.try_update_ui(user, src, ui_key, ui, force_open)
+	if(!ui)
+		ui = new(user, src, ui_key, "EFTPOS.tmpl", "EFTPOS UI", 790, 260)
+		ui.open()
+
+/obj/item/device/eftpos/ui_data(mob/user, ui_key = "main", datum/topic_state/state = default_state)
+	var/data[0]
+	data["eftpos_name"] = eftpos_name
+	data["machine_id"] = machine_id
+	data["transaction_locked"] = transaction_locked
+	data["transaction_paid"] = transaction_paid
+	data["transaction_purpose"] = transaction_purpose
+	data["transaction_amount"] = transaction_amount
+	data["linked_account"] = linked_account
+	if(linked_account)
+		data["linked_account_owner_name"] = linked_account.owner_name
+	return data
+
+/obj/item/device/eftpos/Topic(href, href_list)
+	if(..())
+		return 1
+
 	if(href_list["choice"])
 		switch(href_list["choice"])
 			if("change_code")
@@ -191,7 +175,7 @@
 					access_code = 0
 					to_chat(usr, "[bicon(src)]<span class='info'>Access code reset to 0.</span>")
 
-	src.attack_self(usr)
+	nanomanager.update_uis(src)
 
 /obj/item/device/eftpos/proc/scan_card(var/obj/item/weapon/card/I)
 	if(istype(I, /obj/item/weapon/card/id))
