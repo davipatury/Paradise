@@ -1,5 +1,3 @@
-//This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:31
-
 #define MED_DATA_MAIN	1	// Main menu
 #define MED_DATA_R_LIST	2	// Record list
 #define MED_DATA_MAINT	3	// Records maintenance
@@ -26,8 +24,19 @@
 
 	light_color = LIGHT_COLOR_DARKBLUE
 
+/obj/machinery/computer/med_data/attackby(obj/item/O, mob/user, params)
+	if(istype(O, /obj/item/weapon/card/id) && !scan)
+		usr.drop_item()
+		O.forceMove(src)
+		scan = O
+		ui_interact(user)
+	..()
+
 /obj/machinery/computer/med_data/attack_hand(mob/user)
 	if(..())
+		return
+	if(is_away_level(z))
+		to_chat(user, "<span class='danger'>Unable to establish a connection</span>: You're too far away from the station!")
 		return
 	ui_interact(user)
 
@@ -511,10 +520,8 @@
 						<BR>\n\t[active2.fields["notes"]]<BR>\n
 						<BR>\n
 						<CENTER><B>Comments/Log</B></CENTER><BR>"}
-						var/counter = 1
-						while(active2.fields["com_[counter]"])
-							P.info += "[active2.fields["com_[counter]"]]<BR>"
-							counter++
+						for(var/c in active2.fields["comments"])
+							P.info += "[c]<BR>"
 					else
 						P.info += "<B>Medical Record Lost!</B><BR>"
 					P.info += "</TT>"
@@ -563,3 +570,10 @@
 	icon_keyboard = "laptop_key"
 	icon_screen = "medlaptop"
 	density = 0
+
+#undef MED_DATA_MAIN
+#undef MED_DATA_R_LIST
+#undef MED_DATA_MAINT
+#undef MED_DATA_RECORD
+#undef MED_DATA_V_DATA
+#undef MED_DATA_MEDBOT

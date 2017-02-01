@@ -3,6 +3,15 @@ Title: Medical Records UI
 Used In File(s): \code\game\machinery\computer\medical.dm
 -->
 
+<!--
+#define MED_DATA_MAIN	1	// Main menu
+#define MED_DATA_R_LIST	2	// Record list
+#define MED_DATA_MAINT	3	// Records maintenance
+#define MED_DATA_RECORD	4	// Record
+#define MED_DATA_V_DATA	5	// Virus database
+#define MED_DATA_MEDBOT	6	// Medbot monitor
+-->
+
 {{if data.temp}}
 	{{if data.temp.notice}}
 		<div class="notice"><center>{{:data.temp.text}}</center></div>
@@ -34,7 +43,7 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 	</div>
 	<hr>
 	{{if data.authenticated}}
-		{{if data.screen == 1}}
+		{{if data.screen == 1}} <!-- MED_DATA_MAIN -->
 			<h3>Menu</h3>
 			<div class="item">
 				<div class="line">
@@ -56,18 +65,18 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 					{{:helper.link('Logout', 'lock', {'logout' : 1})}}
 				</div>
 			</div>
-		{{else data.screen == 2}}
+		{{else data.screen == 2}} <!-- MED_DATA_R_LIST -->
 			<h3><center>Record List</center></h3>
 			{{for data.records}}
 				<div class="line">
-					{{:helper.link(value.id + ': ' + value.name, null, {'d_rec' : value.ref})}}
+					{{:helper.link(value.id + ': ' + value.name, 'user', {'d_rec' : value.ref})}}
 				</div>
 			{{/for}}
 			<br><hr>
 			<div class="line">
 				{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}
 			</div>
-		{{else data.screen == 3}}
+		{{else data.screen == 3}} <!-- MED_DATA_MAINT -->
 			<h3>Records Maintenance</h3>
 			<div class="line">
 				{{:helper.link('Backup To Disk', 'download', {'back' : 1}, 'disabled')}}
@@ -81,7 +90,7 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 			<div class="line">
 				{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}
 			</div>
-		{{else data.screen == 4}}
+		{{else data.screen == 4}} <!-- MED_DATA_RECORD -->
 			<h3><center>Medical Record</center></h3>
 			<h4><center>General Data</center></h4>
 			{{if data.general.empty}}
@@ -161,7 +170,7 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 			<div class="line">
 				{{:helper.link('Back', 'arrow-left', {'screen' : 2})}}
 			</div>
-		{{else data.screen == 5}}
+		{{else data.screen == 5}} <!-- MED_DATA_V_DATA -->
 			<h3><center>Virus Database</center></h3>
 			{{for data.virus}}
 				<div class="line">
@@ -170,7 +179,7 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 			{{/for}}
 			<br><hr>
 			{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}
-		{{else data.screen == 6}}
+		{{else data.screen == 6}} <!-- MED_DATA_MEDBOT -->
 			<h3><center>Medical Robot Monitor</center></h3>
 			{{for data.medbots}}
 				<h4>{{:value.name}}</h4>
