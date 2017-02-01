@@ -96,6 +96,7 @@
 						general["fields"] += list(list("field" = "Mental Status:", "value" = active1.fields["m_stat"]))
 						general["photos"] += list(list("photo" = active1.fields["photo-south"]))
 						general["photos"] += list(list("photo" = active1.fields["photo-west"]))
+						general["photos"] += list("has_photos" = (active1.fields["photo-south"] && active1.fields["photo-west"]))
 						general["empty"] = 0
 					else
 						general["empty"] = 1
@@ -119,172 +120,6 @@
 					data["security"] = security
 	return data
 
-/*/obj/machinery/computer/secure_data/proc/interact(mob/user)
-	var/dat
-
-	// search javascript
-	var/head_content = {"
-	<script src="libraries.min.js"></script>
-	<script type='text/javascript'>
-
-	function updateSearch(){
-		var filter_text = document.getElementById('filter');
-		var filter = filter_text.value.toLowerCase();
-
-		if(complete_list != null && complete_list != ""){
-			var mtbl = document.getElementById("maintable_data_archive");
-			mtbl.innerHTML = complete_list;
-		}
-
-		if(filter.value == ""){
-			return;
-		}else{
-			$("#maintable_data").children("tbody").children("tr").children("td").children("input").filter(function(index)
-			{
-				return $(this)\[0\].value.toLowerCase().indexOf(filter) == -1
-			}).parent("td").parent("tr").hide()
-		}
-	}
-
-	function selectTextField(){
-		var filter_text = document.getElementById('filter');
-		filter_text.focus();
-		filter_text.select();
-	}
-
-	</script>
-"}
-
-	if(temp)
-		dat = text("<TT>[]</TT><BR><BR><A href='?src=[UID()];choice=Clear Screen'>Clear Screen</A>", temp)
-	else
-		dat = text("Confirm Identity: <A href='?src=[UID()];choice=Confirm Identity'>[]</A><HR>", (scan ? text("[]", scan.name) : "----------"))
-		if(authenticated)
-			switch(screen)
-				if(SEC_DATA_R_LIST)
-
-					//body tag start + onload and onkeypress (onkeyup) javascript event calls
-					dat += "<body onload='selectTextField(); updateSearch();' onkeyup='updateSearch();'>"
-
-					dat += {"
-<p style='text-align:center;'>"}
-					dat += "<A href='?src=[UID()];choice=New Record (General)'>New Record</A><BR>"
-					//search bar
-					dat += {"
-						<table width='560' align='center' cellspacing='0' cellpadding='5' id='maintable'>
-							<tr id='search_tr'>
-								<td align='center'>
-									<b>Search:</b> <input type='text' id='filter' value='' style='width:300px;'>
-								</td>
-							</tr>
-						</table>
-					"}
-					dat += {"
-</p>
-<table style="text-align:center;" cellspacing="0" width="100%">
-<tr>
-<th>Records:</th>
-</tr>
-</table>
-
-<span id='maintable_data_archive'>
-<table id='maintable_data' style="text-align:center;" border="1" cellspacing="0" width="100%">
-<tr>
-<th><A href='?src=[UID()];choice=Sorting;sort=name'>Name</A></th>
-<th><A href='?src=[UID()];choice=Sorting;sort=id'>ID</A></th>
-<th><A href='?src=[UID()];choice=Sorting;sort=rank'>Rank</A></th>
-<th><A href='?src=[UID()];choice=Sorting;sort=fingerprint'>Fingerprints</A></th>
-<th>Criminal Status</th>
-</tr>"}
-					if(!isnull(data_core.general))
-						for(var/datum/data/record/R in sortRecord(data_core.general, sortBy, order))
-							var/crimstat = ""
-							for(var/datum/data/record/E in data_core.security)
-								if((E.fields["name"] == R.fields["name"] && E.fields["id"] == R.fields["id"]))
-									crimstat = E.fields["criminal"]
-							var/background
-							switch(crimstat)
-								if("*Arrest*")
-									background = "'background-color:#890E26'"
-								if("Incarcerated")
-									background = "'background-color:#743B03'"
-								if("Parolled")
-									background = "'background-color:#743B03'"
-								if("Released")
-									background = "'background-color:#216489'"
-								if("None")
-									background = "'background-color:#007f47'"
-								if("")
-									background = "''"
-									crimstat = "No Record."
-							dat += "<tr style=[background]>"
-							dat += "<td><input type='hidden' value='[R.fields["name"]] [R.fields["id"]] [R.fields["rank"]] [R.fields["fingerprint"]]'></input><A href='?src=[UID()];choice=Browse Record;d_rec=\ref[R]'>[R.fields["name"]]</a></td>"
-							dat += "<td>[R.fields["id"]]</td>"
-							dat += "<td>[R.fields["rank"]]</td>"
-							dat += "<td>[R.fields["fingerprint"]]</td>"
-							dat += "<td>[crimstat]</td></tr>"
-						dat += {"
-						</table></span>
-						<script type='text/javascript'>
-							var maintable = document.getElementById("maintable_data_archive");
-							var complete_list = maintable.innerHTML;
-						</script>
-						<hr width='75%' />"}
-					dat += "<A href='?src=[UID()];choice=Record Maintenance'>Record Maintenance</A><br><br>"
-					dat += "<A href='?src=[UID()];choice=Log Out'>{Log Out}</A>"
-				if(SEC_DATA_MAINT)
-					dat += "<B>Records Maintenance</B><HR>"
-					dat += "<BR><A href='?src=[UID()];choice=Delete All Records'>Delete All Records</A><BR><BR><A href='?src=[UID()];choice=Return'>Back</A>"
-				if(SEC_DATA_REC)
-					dat += "<CENTER><B>Security Record</B></CENTER><BR>"
-					if((istype(active1, /datum/data/record) && data_core.general.Find(active1)))
-						dat += {"
-							<table><tr><td>
-								Name: <A href='?src=[UID()];choice=Edit Field;field=name'>[active1.fields["name"]]</A><BR>
-								ID: <A href='?src=[UID()];choice=Edit Field;field=id'>[active1.fields["id"]]</A><BR>
-								Sex: <A href='?src=[UID()];choice=Edit Field;field=sex'>[active1.fields["sex"]]</A><BR>
-								Age: <A href='?src=[UID()];choice=Edit Field;field=age'>[active1.fields["age"]]</A><BR>
-								Rank: <A href='?src=[UID()];choice=Edit Field;field=rank'>[active1.fields["rank"]]</A><BR>
-								Fingerprint: <A href='?src=[UID()];choice=Edit Field;field=fingerprint'>[active1.fields["fingerprint"]]</A><BR>
-								Physical Status: [active1.fields["p_stat"]]<BR>
-								Mental Status: [active1.fields["m_stat"]]<BR>
-							</td>
-							<td align = center valign = top>
-								Photo:<br>
-								<img src=[active1.fields["photo-south"]] height=80 width=80 border=4>
-								<img src=[active1.fields["photo-west"]] height=80 width=80 border=4><br>
-								<a href='?src=[UID()];choice=Print Photo'>Print Photo</a>
-							</td></tr></table>"}
-					else
-						dat += "<B>General Record Lost!</B><BR>"
-					if((istype(active2, /datum/data/record) && data_core.security.Find(active2)))
-						dat += {"<BR>\n<CENTER><B>Security Data</B></CENTER>
-						<BR>\nCriminal Status: <A href='?src=[UID()];choice=Edit Field;field=criminal'>[active2.fields["criminal"]]</A>
-						<BR>\n<BR>\nMinor Crimes: <A href='?src=[UID()];choice=Edit Field;field=mi_crim'>[active2.fields["mi_crim"]]</A>
-						<BR>\nDetails: <A href='?src=[UID()];choice=Edit Field;field=mi_crim_d'>[active2.fields["mi_crim_d"]]</A><BR>\n
-						<BR>\nMajor Crimes: <A href='?src=[UID()];choice=Edit Field;field=ma_crim'>[active2.fields["ma_crim"]]</A>
-						<BR>\nDetails: <A href='?src=[UID()];choice=Edit Field;field=ma_crim_d'>[active2.fields["ma_crim_d"]]</A><BR>\n
-						<BR>\nImportant Notes:<BR>\n\t<A href='?src=[UID()];choice=Edit Field;field=notes'>[active2.fields["notes"]]</A><BR>\n
-						<BR>\n<CENTER><B>Comments/Log</B></CENTER><BR>"}
-						var/counter = 1
-						while(active2.fields["com_[counter]"])
-							dat += "[active2.fields["com_[counter]"]]<BR><A href='?src=[UID()];choice=Delete Entry;del_c=[counter]'>Delete Entry</A><BR><BR>"
-							counter++
-						dat += "<A href='?src=[UID()];choice=Add Entry'>Add Entry</A><BR><BR>"
-						dat += "<A href='?src=[UID()];choice=Delete Record (Security)'>Delete Record (Security Only)</A><BR><BR>"
-					else
-						dat += "<B>Security Record Lost!</B><BR>"
-						dat += "<A href='?src=[UID()];choice=New Record (Security)'>New Security Record</A><BR><BR>"
-					dat += "\n<A href='?src=[UID()];choice=Delete Record (ALL)'>Delete Record (ALL)</A><BR><BR>\n<A href='?src=[UID()];choice=Print Record'>Print Record</A><BR>\n<A href='?src=[UID()];choice=Return'>Back</A><BR>"
-		else
-			dat += "<A href='?src=[UID()];choice=Log In'>{Log In}</A>"
-	var/datum/browser/popup = new(user, "secure_rec", name, 600, 400)
-	popup.set_content(dat)
-	popup.add_head_content(head_content)
-	popup.open(0)
-	onclose(user, "secure_rec")
-	return*/
-
 /obj/machinery/computer/secure_data/Topic(href, href_list)
 	if(..())
 		return 1
@@ -306,7 +141,7 @@
 				var/prm = splittext(href_list["temp_action"], "=")
 				switch(prm[1])
 					if("del_all2")
-						for(var/datum/data/record/R in data_core.medical)
+						for(var/datum/data/record/R in data_core.security)
 							qdel(R)
 						temp = list("text" = "All records deleted.", "buttons" = list())
 					if("del_r2")
@@ -315,9 +150,8 @@
 					if("del_rg2")
 						if(active1)
 							for(var/datum/data/record/R in data_core.medical)
-								if(R.fields["name"] == active1.fields["name"] || R.fields["id"] == active1.fields["id"])
+								if(R.fields["name"] == active1.fields["name"] && R.fields["id"] == active1.fields["id"])
 									qdel(R)
-								else
 							qdel(active1)
 						if(active2)
 							qdel(active2)
@@ -416,7 +250,7 @@
 					nanomanager.update_uis(src)
 					return
 				for(var/datum/data/record/E in data_core.security)
-					if(E.fields["name"] == R.fields["name"] || E.fields["id"] == R.fields["id"])
+					if(E.fields["name"] == R.fields["name"] && E.fields["id"] == R.fields["id"])
 						M = E
 				active1 = R
 				active2 = M

@@ -167,15 +167,20 @@ Used In File(s): \code\game\machinery\computer\security.dm
 							</div>
 						{{/for}}
 					</div>
-					<div style="width:50%; display:inline-block;">
-						<div style="text-align: center;">
-							<div style="display: inline-block;">
-								{{for data.general.photos}}
-									<img src={{:value.photo}} height=128 width=128 border=5>
-								{{/for}}
+					{{if data.general.photos.has_photos}}
+						<div style="width:50%; display:inline-block;">
+							<div style="text-align: center;">
+								<div style="display: inline-block;">{{:helper.link('Print photo', 'camera', {'print_p' : 1})}}</div>
+							</div>
+							<div style="text-align: center;">
+								<div style="display: inline-block;">
+									{{for data.general.photos}}
+										<img src={{:value.photo}} height=128 width=128 border=5>
+									{{/for}}
+								</div>
 							</div>
 						</div>
-					</div>
+					{{/if}}
 				</div>
 			{{/if}}
 			

@@ -73,6 +73,7 @@
 						general["fields"] += list(list("field" = "Mental Status:", "value" = active1.fields["m_stat"], "name" = "m_stat"))
 						general["photos"] += list(list("photo" = active1.fields["photo-south"]))
 						general["photos"] += list(list("photo" = active1.fields["photo-west"]))
+						general["photos"] += list("has_photos" = (active1.fields["photo-south"] && active1.fields["photo-west"]))
 						general["empty"] = 0
 					else
 						general["empty"] = 1
@@ -428,7 +429,7 @@
 					nanomanager.update_uis(src)
 					return
 				for(var/datum/data/record/E in data_core.medical)
-					if(E.fields["name"] == R.fields["name"] || E.fields["id"] == R.fields["id"])
+					if(E.fields["name"] == R.fields["name"] && E.fields["id"] == R.fields["id"])
 						M = E
 				active1 = R
 				active2 = M
@@ -478,13 +479,13 @@
 				active2 = null
 				t1 = lowertext(t1)
 				for(var/datum/data/record/R in data_core.medical)
-					if(lowertext(R.fields["name"]) == t1 || t1 == lowertext(R.fields["id"]) || t1 == lowertext(R.fields["b_dna"]))
+					if(t1 == lowertext(R.fields["name"]) || t1 == lowertext(R.fields["id"]) || t1 == lowertext(R.fields["b_dna"]))
 						active2 = R
 				if(!active2)
 					temp = list("text" = "Could not locate record [t1].", "buttons" = list())
 				else
 					for(var/datum/data/record/E in data_core.general)
-						if(E.fields["name"] == active2.fields["name"] || E.fields["id"] == active2.fields["id"])
+						if(E.fields["name"] == active2.fields["name"] && E.fields["id"] == active2.fields["id"])
 							active1 = E
 					screen = MED_DATA_RECORD
 
