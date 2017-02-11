@@ -45,22 +45,22 @@
 	var/list/modifiers = params2list(params)
 	if(modifiers["shift"] && modifiers["ctrl"])
 		CtrlShiftClickOn(A)
-		return 1
+		return
 	if(modifiers["shift"] && modifiers["alt"])
 		AltShiftClickOn(A)
-		return 1
+		return
 	if(modifiers["middle"])
 		MiddleClickOn(A)
-		return 1
+		return
 	if(modifiers["shift"])
 		ShiftClickOn(A)
-		return 0
+		return
 	if(modifiers["alt"]) // alt and alt-gr (rightalt)
 		AltClickOn(A)
-		return 1
+		return
 	if(modifiers["ctrl"])
 		CtrlClickOn(A)
-		return 1
+		return
 
 	if(incapacitated(ignore_restraints = 1, ignore_grab = 1, ignore_lying = 1))
 		return
@@ -79,23 +79,21 @@
 	if(restrained())
 		changeNext_move(CLICK_CD_HANDCUFFED) //Doing shit in cuffs shall be vey slow
 		RestrainedClickOn(A)
-		return 1
+		return
 
 	if(in_throw_mode)
 		throw_item(A)
-		trigger_aiming(TARGET_CAN_CLICK)
-		return 1
+		return
 
 	var/obj/item/W = get_active_hand()
 
 	if(W == A)
 		W.attack_self(src)
-		trigger_aiming(TARGET_CAN_CLICK)
 		if(hand)
 			update_inv_l_hand(0)
 		else
 			update_inv_r_hand(0)
-		return 1
+		return
 
 	// operate two STORAGE levels deep here (item in backpack in src; NOT item in box in backpack in src)
 	var/sdepth = A.storage_depth(src)
@@ -110,8 +108,7 @@
 				changeNext_move(CLICK_CD_MELEE)
 			UnarmedAttack(A, 1)
 
-		trigger_aiming(TARGET_CAN_CLICK)
-		return 1
+		return
 
 	if(!isturf(loc)) // This is going to stop you from telekinesing from inside a closet, but I don't shed many tears for that
 		return
@@ -122,35 +119,25 @@
 		if(A.Adjacent(src)) // see adjacent.dm
 			if(W)
 				// Return 1 in attackby() to prevent afterattack() effects (when safely moving items for example, params)
-				var/resolved = A.attackby(W, src, params)
+				var/resolved = A.attackby(W,src,params)
 				if(!resolved && A && W)
-					W.afterattack(A, src, 1, params) // 1: clicking something Adjacent
+					W.afterattack(A,src,1,params) // 1: clicking something Adjacent
 			else
 				if(ismob(A))
 					changeNext_move(CLICK_CD_MELEE)
 				UnarmedAttack(A, 1)
 
-			trigger_aiming(TARGET_CAN_CLICK)
-			return 1
+			return
 		else // non-adjacent click
 			if(W)
 				W.afterattack(A,src,0,params) // 0: not Adjacent
 			else
 				RangedAttack(A, params)
 
-			trigger_aiming(TARGET_CAN_CLICK)
-	return 1
+	return
 
 /mob/proc/changeNext_move(num)
 	next_move = world.time + num
-
-/mob/proc/setClickCooldown(timeout)
-	next_move = max(world.time + timeout, next_move)
-
-/mob/proc/canClick()
-	if(config.no_click_cooldown || next_move <= world.time)
-		return 1
-	return 0
 
 // Default behavior: ignore double clicks, consider them normal clicks instead
 /mob/proc/DblClickOn(var/atom/A, var/params)
