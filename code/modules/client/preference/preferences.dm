@@ -93,6 +93,7 @@ var/global/list/special_role_times = list( //minimum age (in days) for accounts 
 	var/show_ghostitem_attack = TRUE
 	var/UI_style_color = "#ffffff"
 	var/UI_style_alpha = 255
+	var/windowflashing = TRUE
 
 
 	//character preferences
@@ -425,6 +426,7 @@ var/global/list/special_role_times = list( //minimum age (in days) for accounts 
 			dat += "<h2>General Settings</h2>"
 			dat += "<b>Fancy NanoUI:</b> <a href='?_src_=prefs;preference=nanoui'>[(nanoui_fancy) ? "Yes" : "No"]</a><br>"
 			dat += "<b>Ghost-Item Attack Animation:</b> <a href='?_src_=prefs;preference=ghost_att_anim'>[(show_ghostitem_attack) ? "Yes" : "No"]</a><br>"
+			dat += "<b>Window Flashing:</b> <a href='?_src_=prefs;preference=winflash'>[(windowflashing) ? "Yes" : "No"]</a><br>"
 			dat += "<b>Custom UI settings:</b><br>"
 			dat += " - <b>UI Style:</b> <a href='?_src_=prefs;preference=ui'><b>[UI_style]</b></a><br>"
 			dat += " - <b>Color:</b> <a href='?_src_=prefs;preference=UIcolor'><b>[UI_style_color]</b></a> <table style='display:inline;' bgcolor='[UI_style_color]'<tr><td>__</td></tr></table><br>"
@@ -822,6 +824,7 @@ var/global/list/special_role_times = list( //minimum age (in days) for accounts 
 	HTML += ShowDisabilityState(user,DISABILITY_FLAG_EPILEPTIC,"Seizures")
 	HTML += ShowDisabilityState(user,DISABILITY_FLAG_DEAF,"Deaf")
 	HTML += ShowDisabilityState(user,DISABILITY_FLAG_BLIND,"Blind")
+	HTML += ShowDisabilityState(user,DISABILITY_FLAG_COLOURBLIND,"Colourblind")
 	HTML += ShowDisabilityState(user,DISABILITY_FLAG_MUTE,"Mute")
 
 
@@ -1350,9 +1353,8 @@ var/global/list/special_role_times = list( //minimum age (in days) for accounts 
 						//Reset prosthetics.
 						organ_data = list()
 						rlimb_data = list()
-				if("speciesprefs")//oldvox code
-					speciesprefs = !speciesprefs
-
+				if("speciesprefs")
+					speciesprefs = !speciesprefs //Starts 0, so if someone clicks the button up top there, this won't be 0 anymore. If they click it again, it'll go back to 0.
 				if("language")
 //						var/languages_available
 					var/list/new_languages = list("None")
@@ -1927,6 +1929,9 @@ var/global/list/special_role_times = list( //minimum age (in days) for accounts 
 				if("ghost_att_anim")
 					show_ghostitem_attack = !show_ghostitem_attack
 
+				if("winflash")
+					windowflashing = !windowflashing
+
 				if("UIcolor")
 					var/UI_style_color_new = input(user, "Choose your UI color, dark colors are not recommended!", UI_style_color) as color|null
 					if(!UI_style_color_new) return
@@ -2166,6 +2171,9 @@ var/global/list/special_role_times = list( //minimum age (in days) for accounts 
 
 	if(disabilities & DISABILITY_FLAG_BLIND)
 		character.dna.SetSEState(BLINDBLOCK,1,1)
+
+	if(disabilities & DISABILITY_FLAG_COLOURBLIND)
+		character.dna.SetSEState(COLOURBLINDBLOCK,1,1)
 
 	if(disabilities & DISABILITY_FLAG_MUTE)
 		character.dna.SetSEState(MUTEBLOCK,1,1)
