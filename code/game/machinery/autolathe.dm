@@ -1,6 +1,6 @@
-#define AUTOLATHE_MAIN_MENU       1
-#define AUTOLATHE_CATEGORY_MENU   2
-#define AUTOLATHE_SEARCH_MENU     3
+#define AUTOLATHE_MAIN_MENU		1
+#define AUTOLATHE_CATEGORY_MENU	2
+#define AUTOLATHE_SEARCH_MENU	3
 
 /obj/machinery/autolathe
 	name = "autolathe"
@@ -36,16 +36,7 @@
 
 	var/datum/material_container/materials
 
-	var/list/categories = list(
-							"Communication",
-							"Construction",
-							"Electronics",
-							"Medical",
-							"Miscellaneous",
-							"Security",
-							"Tools",
-							"Imported"
-							)
+	var/list/categories = list("Communication", "Construction", "Electronics", "Imported", "Medical", "Miscellaneous", "Security", "Tools")
 
 /obj/machinery/autolathe/New()
 	..()
@@ -89,9 +80,9 @@
 	var/dat
 
 	if(panel_open)
-		dat = wires.GetInteractWindow()
-
+		wires.Interact()
 	else
+		ui_interact(user)
 		switch(screen)
 			if(AUTOLATHE_MAIN_MENU)
 				dat = main_win(user)
@@ -106,9 +97,33 @@
 
 	return
 
+/obj/machinery/autolathe/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+	ui = nanomanager.try_update_ui(user, src, ui_key, ui, force_open)
+	if(!ui)
+		ui = new(user, src, ui_key, "autolathe.tmpl", "Autolathe", 500, 500)
+		ui.open()
+
+/obj/machinery/autolathe/ui_data(mob/user, ui_key = "main", datum/topic_state/state = default_state)
+	var/data[0]
+	data["screen"] = screen
+	data["total_amount"] = materials.total_amount
+	data["max_amount"] = materials.max_amount
+	data["metal_amount"] = materials.amount(MAT_METAL)
+	data["glass_amount"] = materials.amount(MAT_GLASS)
+	switch(screen)
+		if(AUTOLATHE_MAIN_MENU)
+			data["categories"] = categories
+			data["categories_half"] = round(categories.len / 2)
+		if(AUTOLATHE_CATEGORY_MENU)
+			data["selected_category"] = selected_category
+		if(AUTOLATHE_SEARCH_MENU)
+
+
+	return data
+
 /obj/machinery/autolathe/attackby(obj/item/O, mob/user, params)
 	if(busy)
-		to_chat(user, "<span class=\"alert\">The autolathe is busy. Please wait for completion of previous operation.</span>")
+		to_chat(user, "<span class='alert'>The autolathe is busy. Please wait for completion of previous operation.</span>")
 		return 1
 
 	if(default_deconstruction_screwdriver(user, "autolathe_t", "autolathe", O))
@@ -222,7 +237,7 @@
 		if((queue.len+1)<queue_max_len)
 			add_to_queue(design_last_ordered,multiplier)
 		else
-			to_chat(usr, "\red The autolathe queue is full!")
+			to_chat(usr, "<span class='warning'>The autolathe queue is full!</span>")
 		if(!busy)
 			busy = 1
 			process_queue()
@@ -245,7 +260,7 @@
 
 		for(var/v in files.known_designs)
 			var/datum/design/D = files.known_designs[v]
-			if(findtext(D.name,href_list["to_search"]))
+			if(findtext(D.name, href_list["to_search"]))
 				matching_designs.Add(D)
 
 

@@ -1,0 +1,190 @@
+<!--
+Title: Autolathe UI
+Used In File(s): \code\game\machinery\autolathe.dm
+-->
+
+<!--
+#define AUTOLATHE_MAIN_MENU		1
+#define AUTOLATHE_CATEGORY_MENU	2
+#define AUTOLATHE_SEARCH_MENU	3
+-->
+
+{{if data.temp}}
+	{{if data.temp.notice}}
+		<div class="notice"><center>{{:data.temp.text}}</center></div>
+	{{else}}
+		<center>{{:data.temp.text}}</center>
+	{{/if}}
+
+	{{if data.temp.has_buttons}}
+		<div style="text-align: center;">    
+			<div style="display: inline-block;">
+				{{for data.temp.buttons}}
+					{{:helper.link(value.name, value.icon, {'temp' : 1, 'temp_action' : value.val})}}
+				{{/for}}
+			</div>
+		</div>
+	{{/if}}
+	<hr>
+	<div class="line">
+		{{:helper.link('Clear screen', 'home', {'temp' : 1})}}
+	</div>
+{{else}}
+	<div class="item">
+		<div class="itemLabelNarrow">
+			<b>Confirm Identity:</b>
+		</div>
+		<div class="itemContent">
+			{{:helper.link(data.scan ? data.scan : "----------", 'eject', {'scan' : 1}, null, data.scan ? 'fixedLeftWidest' : 'fixedLeft')}}
+		</div>
+	</div>
+	<hr>
+	{{if data.authenticated}}
+		{{if data.screen == 1}} <!-- AUTOLATHE_MAIN_MENU -->
+			<h3><center>Autolathe Menu</center></h3>
+			<div class="item">
+				<div class="itemLabelNarrow"><b>Total amount:</b></div>
+				<div class="itemContent">{{:data.total_amount}} / {{:data.max_amount}} cm<sup>3</sup></div>
+			</div>
+			<div class="item">
+				<div class="itemLabelNarrow"><b>Metal amount:</b></div>
+				<div class="itemContent">{{:data.metal_amount}} cm<sup>3</sup></div>
+			</div>
+			<div class="item">
+				<div class="itemLabelNarrow"><b>Glass amount:</b></div>
+				<div class="itemContent">{{:data.glass_amount}} cm<sup>3</sup></div>
+			</div>
+			<br><hr>
+			<table width='560' align='center' cellspacing='0' cellpadding='5'>
+				<tr>
+					<td align='center'>
+						<form name='search' action='?src={{:data.uid}}'>
+							<input type='hidden' name='src' value='{{:data.uid}}'>
+							<input type='hidden' name='search' value='to_search'>
+							<input type='hidden' name='menu' value='3'>
+							<input type='text' name='to_search'>
+							<input type='submit' value='Search'>
+						</form>
+					</td>
+				</tr>
+			</table>
+			<div class="statusDisplay" style="overflow: auto;">
+				<table style='width: 100%' align='center'>
+					<tr>
+						{{for data.categories}}
+							{{if index == data.categories_half}}
+								</tr><tr>
+							{{/if}}
+							<td>{{:helper.link(value, 'user', {'category' : value, 'menu' : 2})}}</td>
+						{{/for}}
+					</tr>
+				</table>
+			</div>
+		{{else data.screen == 2}} <!-- AUTOLATHE_CATEGORY_MENU -->
+			<h3>Records Maintenance</h3>
+			<div class="line">
+				{{:helper.link('Backup To Disk', 'download', {'back' : 1}, 'disabled')}}
+			</div>
+			<div class="line">
+				{{:helper.link('Upload From disk', 'upload', {'u_load' : 1}, 'disabled')}}
+			</div>
+			<div class="line">
+				{{:helper.link('Delete All Records', 'trash', {'del_all' : 1})}}
+			</div>
+			<div class="line">
+				{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}
+			</div>
+		{{else data.screen == 3}} <!-- AUTOLATHE_SEARCH_MENU -->
+			<h3><center>Security Record</center></h3>
+			<h4><center>General Data</center></h4>
+			{{if data.general.empty}}
+				<span class="bad"><center>General Record Lost!</center></span>
+			{{else}}
+				<div class="statusDisplayRecords">
+					<div style="width:50%; display:inline-block;">
+						{{for data.general.fields}}
+							<div class="item">
+								<div class="itemLabel">
+									{{:value.field}}
+								</div>
+								<div class="itemContent">
+									{{:helper.link(value.value, value.name ? 'pencil' : 'user-times', {'field' : value.name}, value.name ? null : 'disabled')}}
+								</div>
+							</div>
+						{{/for}}
+					</div>
+					{{if data.general.photos.has_photos}}
+						<div style="width:50%; display:inline-block;">
+							<div style="text-align: center;">
+								<div style="display: inline-block;">{{:helper.link('Print photo', 'camera', {'print_p' : 1})}}</div>
+							</div>
+							<div style="text-align: center;">
+								<div style="display: inline-block;">
+									{{for data.general.photos}}
+										<img src={{:value.photo}} height=128 width=128 border=5>
+									{{/for}}
+								</div>
+							</div>
+						</div>
+					{{/if}}
+				</div>
+			{{/if}}
+			
+			<h4><center>Security Data</center></h4>
+			{{if data.security.empty}}
+				<span class="bad"><center>Security Record Lost!</center></span>
+				<div style="text-align: center;">
+					<div style="display: inline-block; height: 100%; vertical-align: middle;">{{:helper.link('New Record', 'plus', {'new_s' : 1})}}</div>
+				</div>
+				<h3><center>Menu</center></h3>
+			{{else}}
+				{{for data.security.fields}}
+					<div class="item">
+						<div class="itemLabel">
+							{{:value.field}}
+						</div>
+						<div class="itemContent">
+							{{:helper.link(value.value, 'pencil', {'field' : value.name})}}
+						</div>
+					</div>
+					{{if value.line_break}}
+						<br>
+					{{/if}}
+				{{/for}}
+				
+				<h4><center>Comments/Log</center></h4>
+				{{for data.security.comments}}
+					<div class="line">
+						{{:value}}
+					</div>
+					<div class="line">
+						{{:helper.link('Remove entry', 'trash', {'del_c' : index})}}
+					</div>
+					<br><hr>
+				{{/for}}
+				
+				<div style="text-align: center;">
+					<div style="display: inline-block; height: 100%; vertical-align: middle;">{{:helper.link('Add Entry', 'plus', {'add_c' : 1})}}</div>
+				</div>
+				
+				<h3><center>Menu</center></h3>
+				<div class="line">
+					{{:helper.link('Delete Record (Security Only)', 'trash', {'del_r' : 1})}}
+				</div>
+			{{/if}}
+			
+			<div class="line">
+				{{:helper.link('Delete Record (All)', 'trash', {'del_rg' : 1})}}
+			</div>
+			<div class="line">
+				{{:helper.link('Print Record', 'print', {'print_r' : 1})}}
+			</div>
+			<div class="line">
+				{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}
+			</div>
+		{{/if}}
+	{{else}}
+		<h3>Menu</h3>
+		{{:helper.link('Login', 'unlock', {'login' : 1})}}
+	{{/if}}
+{{/if}}
