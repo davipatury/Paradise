@@ -31,6 +31,7 @@
 	var/list/being_built = list()
 	var/datum/research/files
 	var/list/datum/design/matching_designs
+	var/temp_search
 	var/selected_category
 	var/screen = 1
 
@@ -85,7 +86,7 @@
 /obj/machinery/autolathe/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
 	ui = nanomanager.try_update_ui(user, src, ui_key, ui, force_open)
 	if(!ui)
-		ui = new(user, src, ui_key, "autolathe.tmpl", "Autolathe", 800, 500)
+		ui = new(user, src, ui_key, "autolathe.tmpl", name, 800, 550)
 		ui.open()
 
 /obj/machinery/autolathe/ui_data(mob/user, ui_key = "main", datum/topic_state/state = default_state)
@@ -101,43 +102,71 @@
 			data["categories"] = categories
 		if(AUTOLATHE_CATEGORY_MENU)
 			data["selected_category"] = selected_category
-			var/designs[0]
+			var/list/designs = list()
+			data["designs"] = designs
 			for(var/v in files.known_designs)
 				var/datum/design/D = files.known_designs[v]
 				if(!(selected_category in D.category))
 					continue
-
-				var/design[0]
+				var/list/design = list()
+				designs[++designs.len] = design
 				design["name"] = D.name
 				design["id"] = D.id
 				design["disabled"] = disabled || !can_build(D) ? "disabled" : null
-
 				if(ispath(D.build_path, /obj/item/stack))
 					design["max_multiplier"] = min(D.maxstack, D.materials[MAT_METAL] ? round(materials.amount(MAT_METAL) / D.materials[MAT_METAL]) : INFINITY, D.materials[MAT_GLASS] ? round(materials.amount(MAT_GLASS) / D.materials[MAT_GLASS]) : INFINITY)
 				else
 					design["max_multiplier"] = null
-
-				design["design_cost"] = get_design_cost(D)
-				designs += list(design)
-			data["designs"] = designs
+				design["materials"] = design_cost_data(D)
 		if(AUTOLATHE_SEARCH_MENU)
-			var/designs[0]
+			data["search"] = temp_search
+			var/list/designs = list()
+			data["designs"] = designs
 			for(var/datum/design/D in matching_designs)
-				var/design[0]
+				var/list/design = list()
+				designs[++designs.len] = design
 				design["name"] = D.name
 				design["id"] = D.id
 				design["disabled"] = disabled || !can_build(D) ? "disabled" : null
-
 				if(ispath(D.build_path, /obj/item/stack))
 					design["max_multiplier"] = min(D.maxstack, D.materials[MAT_METAL] ? round(materials.amount(MAT_METAL) / D.materials[MAT_METAL]) : INFINITY, D.materials[MAT_GLASS] ? round(materials.amount(MAT_GLASS) / D.materials[MAT_GLASS]) : INFINITY)
 				else
 					design["max_multiplier"] = null
+				design["materials"] = design_cost_data(D)
 
-				design["design_cost"] = get_design_cost(D)
-				designs += list(design)
-			data["designs"] = designs
+	data = queue_data(data)
+	return data
 
-	data = get_queue(data)
+/obj/machinery/autolathe/proc/design_cost_data(datum/design/D)
+	var/list/data = list()
+	var/coeff = get_coeff(D)
+
+	var/list/is_red = list("metal" = 0, "glass" = 0)
+	if(D.materials[MAT_METAL] && (materials.amount(MAT_METAL) < (D.materials[MAT_METAL] / coeff)))
+		is_red["metal"] = 1
+	if(D.materials[MAT_GLASS] && (materials.amount(MAT_GLASS) < (D.materials[MAT_GLASS] / coeff)))
+		is_red["glass"] = 1
+
+	data[++data.len] = list("name" = "metal", "amount" = D.materials[MAT_METAL] / coeff, "is_red" = is_red["metal"])
+	data[++data.len] = list("name" = "glass", "amount" = D.materials[MAT_GLASS] / coeff, "is_red" = is_red["glass"])
+
+	return data
+
+/obj/machinery/autolathe/proc/queue_data(list/data)
+	var/temp_metal = materials.amount(MAT_METAL)
+	var/temp_glass = materials.amount(MAT_GLASS)
+	data["processing"] = being_built.len ? get_processing_line() : null
+	if(istype(queue) && queue.len)
+		var/data_queue[0]
+		for(var/list/L in queue)
+			var/datum/design/D = L[1]
+			var/list/LL = get_design_cost_as_list(D, L[2])
+			data_queue += list(list("name" = initial(D.name), "can_build" = can_build(D, L[2], temp_metal, temp_glass), "multiplier" = L[2]))
+			temp_metal = max(temp_metal - LL[1], 1)
+			temp_glass = max(temp_glass - LL[2] ,1)
+		data["queue"] = data_queue
+	else
+		data["queue"] = null
 	return data
 
 /obj/machinery/autolathe/attackby(obj/item/O, mob/user, params)
@@ -276,11 +305,15 @@
 	if(href_list["clear_queue"])
 		queue = list()
 	if(href_list["search"])
+		if(href_list["to_search"])
+			temp_search = href_list["to_search"]
+		if(!temp_search)
+			return
 		matching_designs.Cut()
 
 		for(var/v in files.known_designs)
 			var/datum/design/D = files.known_designs[v]
-			if(findtext(D.name, href_list["to_search"]))
+			if(findtext(D.name, temp_search))
 				matching_designs.Add(D)
 
 		screen = AUTOLATHE_SEARCH_MENU
@@ -297,11 +330,11 @@
 	for(var/obj/item/weapon/stock_parts/manipulator/M in component_parts)
 		prod_coeff += M.rating - 1
 
-/obj/machinery/autolathe/proc/get_coeff(var/datum/design/D)
+/obj/machinery/autolathe/proc/get_coeff(datum/design/D)
 	var/coeff = (ispath(D.build_path,/obj/item/stack) ? 1 : 2 ** prod_coeff)//stacks are unaffected by production coefficient
 	return coeff
 
-/obj/machinery/autolathe/proc/build_item(var/datum/design/D, var/multiplier)
+/obj/machinery/autolathe/proc/build_item(datum/design/D, multiplier)
 	desc = initial(desc)+"\nIt's building \a [initial(D.name)]."
 	var/is_stack = ispath(D.build_path, /obj/item/stack)
 	var/coeff = get_coeff(D)
@@ -331,7 +364,7 @@
 	updateUsrDialog()
 	desc = initial(desc)
 
-/obj/machinery/autolathe/proc/can_build(var/datum/design/D,var/multiplier=1,var/custom_metal,var/custom_glass)
+/obj/machinery/autolathe/proc/can_build(datum/design/D, multiplier = 1, custom_metal, custom_glass)
 	var/coeff = get_coeff(D)
 
 	var/metal_amount = materials.amount(MAT_METAL)
@@ -347,7 +380,7 @@
 		return 0
 	return 1
 
-/obj/machinery/autolathe/proc/get_design_cost_as_list(var/datum/design/D,var/multiplier=1)
+/obj/machinery/autolathe/proc/get_design_cost_as_list(datum/design/D, multiplier = 1)
 	var/list/OutputList = list(0,0)
 	var/coeff = get_coeff(D)
 	if(D.materials[MAT_METAL])
@@ -363,24 +396,7 @@
 	var/output = "PROCESSING: [initial(D.name)][is_stack?" (x[multiplier])":null]"
 	return output
 
-/obj/machinery/autolathe/proc/get_queue(list/data)
-	var/temp_metal = materials.amount(MAT_METAL)
-	var/temp_glass = materials.amount(MAT_GLASS)
-	data["processing"] = being_built.len ? get_processing_line() : null
-	if(istype(queue) && queue.len)
-		var/data_queue[0]
-		for(var/list/L in queue)
-			var/datum/design/D = L[1]
-			var/list/LL = get_design_cost_as_list(D, L[2])
-			data_queue += list(list("name" = initial(D.name), "can_build" = can_build(D, L[2], temp_metal, temp_glass), "multiplier" = L[2]))
-			temp_metal = max(temp_metal - LL[1], 1)
-			temp_glass = max(temp_glass - LL[2] ,1)
-		data["queue"] = data_queue
-	else
-		data["queue"] = null
-	return data
-
-/obj/machinery/autolathe/proc/add_to_queue(D,var/multiplier)
+/obj/machinery/autolathe/proc/add_to_queue(D, multiplier)
 	if(!istype(queue))
 		queue = list()
 	if(D)
@@ -419,16 +435,7 @@
 	being_built = new /list()
 	//visible_message("[bicon(src)] <b>\The [src]</b> beeps, \"Queue processing finished successfully.\"")
 
-/obj/machinery/autolathe/proc/get_design_cost(var/datum/design/D)
-	var/coeff = get_coeff(D)
-	var/data = list("metal" = null, "glass" = null)
-	if(D.materials[MAT_METAL])
-		data["metal"] = D.materials[MAT_METAL] / coeff
-	if(D.materials[MAT_GLASS])
-		data["glass"] = D.materials[MAT_GLASS] / coeff
-	return data
-
-/obj/machinery/autolathe/proc/adjust_hacked(var/hack)
+/obj/machinery/autolathe/proc/adjust_hacked(hack)
 	hacked = hack
 
 	if(hack)
