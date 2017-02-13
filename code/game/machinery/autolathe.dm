@@ -74,28 +74,13 @@
 
 /obj/machinery/autolathe/interact(mob/user)
 	if(shocked && !(stat & NOPOWER))
-		shock(user,50)
-
-	user.set_machine(src)
-	var/dat
+		shock(user, 50)
+		return
 
 	if(panel_open)
 		wires.Interact()
 	else
 		ui_interact(user)
-		switch(screen)
-			if(AUTOLATHE_MAIN_MENU)
-				dat = main_win(user)
-			if(AUTOLATHE_CATEGORY_MENU)
-				dat = category_win(user,selected_category)
-			if(AUTOLATHE_SEARCH_MENU)
-				dat = search_win(user)
-
-	var/datum/browser/popup = new(user, "autolathe", name, 800, 500)
-	popup.set_content(dat)
-	popup.open()
-
-	return
 
 /obj/machinery/autolathe/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
 	ui = nanomanager.try_update_ui(user, src, ui_key, ui, force_open)
@@ -112,8 +97,8 @@
 	data["glass_amount"] = materials.amount(MAT_GLASS)
 	switch(screen)
 		if(AUTOLATHE_MAIN_MENU)
+			data["uid"] = UID()
 			data["categories"] = categories
-			data["categories_half"] = round(categories.len / 2)
 		if(AUTOLATHE_CATEGORY_MENU)
 			data["selected_category"] = selected_category
 			var/designs[0]
@@ -125,31 +110,31 @@
 				var/design[0]
 				design["name"] = D.name
 				design["id"] = D.id
-				design["disabled"] = disabled || !can_build(D)
+				design["disabled"] = disabled || !can_build(D) ? "disabled" : null
 
 				if(ispath(D.build_path, /obj/item/stack))
 					design["max_multiplier"] = min(D.maxstack, D.materials[MAT_METAL] ? round(materials.amount(MAT_METAL) / D.materials[MAT_METAL]) : INFINITY, D.materials[MAT_GLASS] ? round(materials.amount(MAT_GLASS) / D.materials[MAT_GLASS]) : INFINITY)
 				else
 					design["max_multiplier"] = null
 
-				data["design_cost"] = get_design_cost(D)
-				designs += design
+				design["design_cost"] = get_design_cost(D)
+				designs += list(design)
 			data["designs"] = designs
 		if(AUTOLATHE_SEARCH_MENU)
 			var/designs[0]
-			for(var/datum/design/D in files.matching_designs)
+			for(var/datum/design/D in matching_designs)
 				var/design[0]
 				design["name"] = D.name
 				design["id"] = D.id
-				design["disabled"] = disabled || !can_build(D)
+				design["disabled"] = disabled || !can_build(D) ? "disabled" : null
 
 				if(ispath(D.build_path, /obj/item/stack))
 					design["max_multiplier"] = min(D.maxstack, D.materials[MAT_METAL] ? round(materials.amount(MAT_METAL) / D.materials[MAT_METAL]) : INFINITY, D.materials[MAT_GLASS] ? round(materials.amount(MAT_GLASS) / D.materials[MAT_GLASS]) : INFINITY)
 				else
 					design["max_multiplier"] = null
 
-				data["design_cost"] = get_design_cost(D)
-				designs += design
+				design["design_cost"] = get_design_cost(D)
+				designs += list(design)
 			data["designs"] = designs
 
 	data = get_queue(data)
@@ -300,10 +285,7 @@
 
 		screen = AUTOLATHE_SEARCH_MENU
 
-
-	src.updateUsrDialog()
-
-	return
+	nanomanager.update_uis(src)
 
 /obj/machinery/autolathe/RefreshParts()
 	var/tot_rating = 0
@@ -386,14 +368,14 @@
 	var/temp_glass = materials.amount(MAT_GLASS)
 	data["processing"] = being_built.len ? get_processing_line() : null
 	if(istype(queue) && queue.len)
-		var/queue[0]
+		var/data_queue[0]
 		for(var/list/L in queue)
 			var/datum/design/D = L[1]
 			var/list/LL = get_design_cost_as_list(D, L[2])
-			queue += list(list("name" = initial(D.name), "can_build" = can_build(D, L[2], temp_metal, temp_glass), "multiplier" = L[2]))
+			data_queue += list(list("name" = initial(D.name), "can_build" = can_build(D, L[2], temp_metal, temp_glass), "multiplier" = L[2]))
 			temp_metal = max(temp_metal - LL[1], 1)
 			temp_glass = max(temp_glass - LL[2] ,1)
-		data["queue"] = queue
+		data["queue"] = data_queue
 	else
 		data["queue"] = null
 	return data

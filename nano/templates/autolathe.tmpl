@@ -9,7 +9,7 @@ Used In File(s): \code\game\machinery\autolathe.dm
 #define AUTOLATHE_SEARCH_MENU	3
 -->
 
-<table style='width:100%'>
+<table style='width: 100%;'>
 	<tr>
 		<td valign='top'>
 			{{if data.screen == 1}} <!-- AUTOLATHE_MAIN_MENU -->
@@ -30,9 +30,9 @@ Used In File(s): \code\game\machinery\autolathe.dm
 				<table width='560' align='center' cellspacing='0' cellpadding='5'>
 					<tr>
 						<td align='center'>
-							<form name='search' action='?src={{:data.uid}}'>
+							<form action='?src={{:data.uid}}'>
 								<input type='hidden' name='src' value='{{:data.uid}}'>
-								<input type='hidden' name='search' value='to_search'>
+								<input type='hidden' name='search' value='1'>
 								<input type='text' name='to_search'>
 								<input type='submit' value='Search'>
 							</form>
@@ -43,17 +43,20 @@ Used In File(s): \code\game\machinery\autolathe.dm
 					<table style='width: 100%' align='center'>
 						<tr>
 							{{for data.categories}}
-								{{if index == data.categories_half}}
+								{{if (index & 1) == 0 && index != 0}}
 									</tr><tr>
 								{{/if}}
-								<td>{{:helper.link(value, 'user', {'category' : value})}}</td>
+								<td>{{:helper.link(value, 'list', {'category' : value})}}</td>
 							{{/for}}
 						</tr>
 					</table>
 				</div>
-			{{else data.screen == 2}} <!-- AUTOLATHE_CATEGORY_MENU -->
-				{{:helper.link('Return to main menu', 'home', {'menu' : 1})}}
-				<h3><center>Browsing {{:data.selected_category}}</center></h3>
+			{{else data.screen == 2 || data.screen == 3}}
+				{{if data.screen == 2}} <!-- AUTOLATHE_CATEGORY_MENU -->
+					<h3><center>Browsing {{:data.selected_category}}</center></h3>
+				{{else data.screen == 3}} <!-- AUTOLATHE_SEARCH_MENU -->
+					<h3><center>Search results</center></h3>
+				{{/if}}
 				<div class="item">
 					<div class="itemLabelNarrow"><b>Total amount:</b></div>
 					<div class="itemContent">{{:data.total_amount}} / {{:data.max_amount}} cm<sup>3</sup></div>
@@ -67,60 +70,30 @@ Used In File(s): \code\game\machinery\autolathe.dm
 					<div class="itemContent">{{:data.glass_amount}} cm<sup>3</sup></div>
 				</div>
 				<br><hr>
-				{{for data.designs}}
-					{{:helper.link(value.name, 'wrench', {'make' : value.id, 'multiplier' : 1}, value.disabled)}}
-					{{if value.max_multiplier > 10}}
-						{{:helper.link('x10', 'wrench', {'make' : value.id, 'multiplier' : 10}, value.disabled)}}]
-					{{/if}}
-					{{if value.max_multiplier > 25}}
-						{{:helper.link('x10', 'wrench', {'make' : value.id, 'multiplier' : 25}, value.disabled)}}]
-					{{/if}}
-					{{if value.max_multiplier}}
-						{{:helper.link('x' + value.max_multiplier, 'wrench', {'make' : value.id, 'multiplier' : value.max_multiplier}, value.disabled)}}]
-					{{/if}}
-					
-					{{if value.design_cost.metal}}
-						{{:value.design_cost.metal}} metal
-					{{/if}}
-					{{if value.design_cost.glass}}
-						{{:value.design_cost.glass}} glass
-					{{/if}}
-				{{/for}}
-			{{else data.screen == 3}} <!-- AUTOLATHE_SEARCH_MENU -->
+				<div class="statusDisplay" style="overflow: auto; width: 500px;">
+					{{for data.designs}}
+						<div class="line">
+							{{:helper.link(value.name, 'print', {'make' : value.id, 'multiplier' : 1}, value.disabled)}}
+							{{if value.max_multiplier > 10}}
+								{{:helper.link('x10', null, {'make' : value.id, 'multiplier' : 10}, value.disabled)}}
+							{{/if}}
+							{{if value.max_multiplier > 25}}
+								{{:helper.link('x25', null, {'make' : value.id, 'multiplier' : 25}, value.disabled)}}
+							{{/if}}
+							{{if value.max_multiplier}}
+								{{:helper.link('x' + value.max_multiplier, null, {'make' : value.id, 'multiplier' : value.max_multiplier}, value.disabled)}}
+							{{/if}}
+							
+							{{if value.design_cost.metal}}
+								{{:value.design_cost.metal}} metal
+							{{/if}}
+							{{if value.design_cost.glass}}
+								{{:value.design_cost.glass}} glass
+							{{/if}}
+						</div>
+					{{/for}}
+				</div>
 				{{:helper.link('Return to main menu', 'home', {'menu' : 1})}}
-				<h3><center>Search results</center></h3>
-				<div class="item">
-					<div class="itemLabelNarrow"><b>Total amount:</b></div>
-					<div class="itemContent">{{:data.total_amount}} / {{:data.max_amount}} cm<sup>3</sup></div>
-				</div>
-				<div class="item">
-					<div class="itemLabelNarrow"><b>Metal amount:</b></div>
-					<div class="itemContent">{{:data.metal_amount}} cm<sup>3</sup></div>
-				</div>
-				<div class="item">
-					<div class="itemLabelNarrow"><b>Glass amount:</b></div>
-					<div class="itemContent">{{:data.glass_amount}} cm<sup>3</sup></div>
-				</div>
-				<br><hr>
-				{{for data.designs}}
-					{{:helper.link(value.name, 'wrench', {'make' : value.id, 'multiplier' : 1}, value.disabled)}}
-					{{if value.max_multiplier > 10}}
-						{{:helper.link('x10', 'wrench', {'make' : value.id, 'multiplier' : 10}, value.disabled)}}]
-					{{/if}}
-					{{if value.max_multiplier > 25}}
-						{{:helper.link('x10', 'wrench', {'make' : value.id, 'multiplier' : 25}, value.disabled)}}]
-					{{/if}}
-					{{if value.max_multiplier}}
-						{{:helper.link('x' + value.max_multiplier, 'wrench', {'make' : value.id, 'multiplier' : value.max_multiplier}, value.disabled)}}]
-					{{/if}}
-					
-					{{if value.design_cost.metal}}
-						{{:value.design_cost.metal}} metal
-					{{/if}}
-					{{if value.design_cost.glass}}
-						{{:value.design_cost.glass}} glass
-					{{/if}}
-				{{/for}}
 			{{/if}}
 		</td>
 		<td valign='top' style='width: 300px;'>
@@ -132,7 +105,15 @@ Used In File(s): \code\game\machinery\autolathe.dm
 					{{/if}}
 					<ol>
 						{{for data.queue}}
-							<li {{:value.can_build ? 'style="color: #f00;"' : ''}}>{{:value.name}} {{:value.multiplier > 1 ? '(x{{:value.multiplier}})' : ''}}</li>
+							<li>
+								{{if !value.can_build}}
+									<span class='bad'>
+								{{/if}}
+								{{:value.name}} {{:value.multiplier > 1 ? '(xvalue.multiplier)' : ''}}
+								{{if !value.can_build}}
+									</span>
+								{{/if}}
+							</li>
 						{{/for}}
 					</ol>
 					{{:helper.link('Clear queue', 'trash', {'clear_queue' : 1})}}

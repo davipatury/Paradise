@@ -29,9 +29,7 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 		</div>
 	{{/if}}
 	<hr>
-	<div class="line">
-		{{:helper.link('Clear screen', 'home', {'temp' : 1})}}
-	</div>
+	<div class="line">{{:helper.link('Clear screen', 'home', {'temp' : 1})}}</div>
 {{else}}
 	<div class="item">
 		<div class="itemLabelNarrow">
@@ -46,50 +44,26 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 		{{if data.screen == 1}} <!-- MED_DATA_MAIN -->
 			<h3>Menu</h3>
 			<div class="item">
-				<div class="line">
-					{{:helper.link('Search Records', 'search', {'search' : 1})}}
-				</div>
-				<div class="line">
-					{{:helper.link('List Records', 'list', {'screen' : 2})}}
-				</div>
-				<div class="line">
-					{{:helper.link('Virus Database', 'database', {'screen' : 5})}}
-				</div>
-				<div class="line">
-					{{:helper.link('Medbot Tracking', 'plus-square', {'screen' : 6})}}
-				</div>
-				<div class="line">
-					{{:helper.link('Record Maintenance', 'wrench', {'screen' : 3})}}
-				</div>
-				<div class="line">
-					{{:helper.link('Logout', 'lock', {'logout' : 1})}}
-				</div>
+				<div class="line">{{:helper.link('Search Records', 'search', {'search' : 1})}}</div>
+				<div class="line">{{:helper.link('List Records', 'list', {'screen' : 2})}}</div>
+				<div class="line">{{:helper.link('Virus Database', 'database', {'screen' : 5})}}</div>
+				<div class="line">{{:helper.link('Medbot Tracking', 'plus-square', {'screen' : 6})}}</div>
+				<div class="line">{{:helper.link('Record Maintenance', 'wrench', {'screen' : 3})}}</div>
+				<div class="line">{{:helper.link('Logout', 'lock', {'logout' : 1})}}</div>
 			</div>
 		{{else data.screen == 2}} <!-- MED_DATA_R_LIST -->
 			<h3><center>Record List</center></h3>
 			{{for data.records}}
-				<div class="line">
-					{{:helper.link(value.id + ': ' + value.name, 'user', {'d_rec' : value.ref})}}
-				</div>
+				<div class="line">{{:helper.link(value.id + ': ' + value.name, 'user', {'d_rec' : value.ref})}}</div>
 			{{/for}}
 			<br><hr>
-			<div class="line">
-				{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}
-			</div>
+			<div class="line">{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}</div>
 		{{else data.screen == 3}} <!-- MED_DATA_MAINT -->
 			<h3>Records Maintenance</h3>
-			<div class="line">
-				{{:helper.link('Backup To Disk', 'download', {'back' : 1}, 'disabled')}}
-			</div>
-			<div class="line">
-				{{:helper.link('Upload From disk', 'upload', {'u_load' : 1}, 'disabled')}}
-			</div>
-			<div class="line">
-				{{:helper.link('Delete All Records', 'trash', {'del_all' : 1})}}
-			</div>
-			<div class="line">
-				{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}
-			</div>
+			<div class="line">{{:helper.link('Backup To Disk', 'download', {'back' : 1}, 'disabled')}}</div>
+			<div class="line">{{:helper.link('Upload From disk', 'upload', {'u_load' : 1}, 'disabled')}}</div>
+			<div class="line">{{:helper.link('Delete All Records', 'trash', {'del_all' : 1})}}</div>
+			<div class="line">{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}</div>
 		{{else data.screen == 4}} <!-- MED_DATA_RECORD -->
 			<h3><center>Medical Record</center></h3>
 			<h4><center>General Data</center></h4>
@@ -147,12 +121,8 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 				
 				<h4><center>Comments/Log</center></h4>
 				{{for data.medical.comments}}
-					<div class="line">
-						{{:value}}
-					</div>
-					<div class="line">
-						{{:helper.link('Remove entry', 'trash', {'del_c' : index})}}
-					</div>
+					<div class="line">{{:value}}</div>
+					<div class="line">{{:helper.link('Remove entry', 'trash', {'del_c' : index})}}</div>
 					<br><hr>
 				{{/for}}
 				
@@ -161,23 +131,15 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 				</div>
 				
 				<h3><center>Menu</center></h3>
-				<div class="line">
-					{{:helper.link('Delete Record (Medical Only)', 'trash', {'del_r' : 1})}}
-				</div>
+				<div class="line">{{:helper.link('Delete Record (Medical Only)', 'trash', {'del_r' : 1})}}</div>
 			{{/if}}
 			
-			<div class="line">
-				{{:helper.link('Print Record', 'print', {'print_p' : 1})}}
-			</div>
-			<div class="line">
-				{{:helper.link('Back', 'arrow-left', {'screen' : 2})}}
-			</div>
+			<div class="line">{{:helper.link('Print Record', 'print', {'print_p' : 1})}}</div>
+			<div class="line">{{:helper.link('Back', 'arrow-left', {'screen' : 2})}}</div>
 		{{else data.screen == 5}} <!-- MED_DATA_V_DATA -->
 			<h3><center>Virus Database</center></h3>
 			{{for data.virus}}
-				<div class="line">
-					{{:helper.link(value.name, 'eye', {'vir' : value.D})}}
-				</div>
+				<div class="line">{{:helper.link(value.name, 'eye', {'vir' : value.D})}}</div>
 			{{/for}}
 			<br><hr>
 			{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}
@@ -205,9 +167,7 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 			{{empty}}
 				<div class="notice"><center>None detected!</center></div>
 			{{/for}}
-			<div class="line">
-				{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}
-			</div>
+			<div class="line">{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}</div>
 		{{/if}}
 	{{else}}
 		<h3>Menu</h3>
