@@ -100,7 +100,7 @@
 /obj/machinery/autolathe/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
 	ui = nanomanager.try_update_ui(user, src, ui_key, ui, force_open)
 	if(!ui)
-		ui = new(user, src, ui_key, "autolathe.tmpl", "Autolathe", 500, 500)
+		ui = new(user, src, ui_key, "autolathe.tmpl", "Autolathe", 800, 500)
 		ui.open()
 
 /obj/machinery/autolathe/ui_data(mob/user, ui_key = "main", datum/topic_state/state = default_state)
@@ -116,9 +116,43 @@
 			data["categories_half"] = round(categories.len / 2)
 		if(AUTOLATHE_CATEGORY_MENU)
 			data["selected_category"] = selected_category
+			var/designs[0]
+			for(var/v in files.known_designs)
+				var/datum/design/D = files.known_designs[v]
+				if(!(selected_category in D.category))
+					continue
+
+				var/design[0]
+				design["name"] = D.name
+				design["id"] = D.id
+				design["disabled"] = disabled || !can_build(D)
+
+				if(ispath(D.build_path, /obj/item/stack))
+					design["max_multiplier"] = min(D.maxstack, D.materials[MAT_METAL] ? round(materials.amount(MAT_METAL) / D.materials[MAT_METAL]) : INFINITY, D.materials[MAT_GLASS] ? round(materials.amount(MAT_GLASS) / D.materials[MAT_GLASS]) : INFINITY)
+				else
+					design["max_multiplier"] = null
+
+				data["design_cost"] = get_design_cost(D)
+				designs += design
+			data["designs"] = designs
 		if(AUTOLATHE_SEARCH_MENU)
+			var/designs[0]
+			for(var/datum/design/D in files.matching_designs)
+				var/design[0]
+				design["name"] = D.name
+				design["id"] = D.id
+				design["disabled"] = disabled || !can_build(D)
 
+				if(ispath(D.build_path, /obj/item/stack))
+					design["max_multiplier"] = min(D.maxstack, D.materials[MAT_METAL] ? round(materials.amount(MAT_METAL) / D.materials[MAT_METAL]) : INFINITY, D.materials[MAT_GLASS] ? round(materials.amount(MAT_GLASS) / D.materials[MAT_GLASS]) : INFINITY)
+				else
+					design["max_multiplier"] = null
 
+				data["design_cost"] = get_design_cost(D)
+				designs += design
+			data["designs"] = designs
+
+	data = get_queue(data)
 	return data
 
 /obj/machinery/autolathe/attackby(obj/item/O, mob/user, params)
@@ -127,7 +161,7 @@
 		return 1
 
 	if(default_deconstruction_screwdriver(user, "autolathe_t", "autolathe", O))
-		updateUsrDialog()
+		nanomanager.update_uis(src)
 		return
 
 	if(exchange_parts(user, O))
@@ -191,7 +225,7 @@
 			use_power(max(500,inserted/10))
 			qdel(O)
 	busy = 0
-	src.updateUsrDialog()
+	nanomanager.update_uis(src)
 
 /obj/machinery/autolathe/attack_ghost(mob/user)
 	interact(user)
@@ -210,6 +244,7 @@
 
 	if(href_list["category"])
 		selected_category = href_list["category"]
+		screen = AUTOLATHE_CATEGORY_MENU
 
 	if(href_list["make"])
 		BuildTurf = loc
@@ -262,6 +297,8 @@
 			var/datum/design/D = files.known_designs[v]
 			if(findtext(D.name, href_list["to_search"]))
 				matching_designs.Add(D)
+
+		screen = AUTOLATHE_SEARCH_MENU
 
 
 	src.updateUsrDialog()
@@ -344,41 +381,22 @@
 	var/output = "PROCESSING: [initial(D.name)][is_stack?" (x[multiplier])":null]"
 	return output
 
-/obj/machinery/autolathe/proc/get_queue()
+/obj/machinery/autolathe/proc/get_queue(list/data)
 	var/temp_metal = materials.amount(MAT_METAL)
 	var/temp_glass = materials.amount(MAT_GLASS)
-	var/output = "<td valign='top' style='width: 300px'>"
-	output += "<div class='statusDisplay'>"
-	output += "<b>Queue contains:</b>"
-	if(!istype(queue) || !queue.len)
-		if(being_built.len)
-			output += "<ol><li>"
-			output += get_processing_line()
-			output += "</li></ol>"
-		else
-			output += "<br>Nothing"
-	else
-		output += "<ol>"
-		if(being_built.len)
-			output += "<li>"
-			output += get_processing_line()
-			output += "</li>"
-		var/i = 0
-		var/datum/design/D
+	data["processing"] = being_built.len ? get_processing_line() : null
+	if(istype(queue) && queue.len)
+		var/queue[0]
 		for(var/list/L in queue)
-			i++
-			D = L[1]
-			var/multiplier = L[2]
-			var/list/LL = get_design_cost_as_list(D,multiplier)
-			var/is_stack = (multiplier>1)
-			output += "<li[!can_build(D,multiplier,temp_metal,temp_glass)?" style='color: #f00;'":null]>[initial(D.name)][is_stack?" (x[multiplier])":null] - [i>1?"<a href='?src=[UID()];queue_move=-1;index=[i]' class='arrow'>&uarr;</a>":null] [i<queue.len?"<a href='?src=[UID()];queue_move=+1;index=[i]' class='arrow'>&darr;</a>":null] <a href='?src=[UID()];remove_from_queue=[i]'>Remove</a></li>"
-			temp_metal = max(temp_metal-LL[1],1)
-			temp_glass = max(temp_glass-LL[2],1)
-
-		output += "</ol>"
-		output += "<a href='?src=[UID()];clear_queue=1'>Clear queue</a>"
-	output += "</div></td>"
-	return output
+			var/datum/design/D = L[1]
+			var/list/LL = get_design_cost_as_list(D, L[2])
+			queue += list(list("name" = initial(D.name), "can_build" = can_build(D, L[2], temp_metal, temp_glass), "multiplier" = L[2]))
+			temp_metal = max(temp_metal - LL[1], 1)
+			temp_glass = max(temp_glass - LL[2] ,1)
+		data["queue"] = queue
+	else
+		data["queue"] = null
+	return data
 
 /obj/machinery/autolathe/proc/add_to_queue(D,var/multiplier)
 	if(!istype(queue))
@@ -419,115 +437,14 @@
 	being_built = new /list()
 	//visible_message("[bicon(src)] <b>\The [src]</b> beeps, \"Queue processing finished successfully.\"")
 
-/obj/machinery/autolathe/proc/main_win(mob/user)
-	var/dat = "<table style='width:100%'><tr>"
-	dat += "<td valign='top' style='margin-right: 300px'>"
-	dat += "<div class='statusDisplay'><h3>Autolathe Menu:</h3><br>"
-	dat += "<b>Total amount:</b> [materials.total_amount] / [materials.max_amount] cm<sup>3</sup><br>"
-	dat += "<b>Metal amount:</b> [materials.amount(MAT_METAL)] cm<sup>3</sup><br>"
-	dat += "<b>Glass amount:</b> [materials.amount(MAT_GLASS)] cm<sup>3</sup><br>"
-
-	dat += "<form name='search' action='?src=[UID()]'> \
-	<input type='hidden' name='src' value='[UID()]'> \
-	<input type='hidden' name='search' value='to_search'> \
-	<input type='hidden' name='menu' value='[AUTOLATHE_SEARCH_MENU]'> \
-	<input type='text' name='to_search'> \
-	<input type='submit' value='Search'> \
-	</form><hr>"
-
-	var/line_length = 1
-	dat += "<table style='width:100%' align='center'><tr>"
-
-	for(var/C in categories)
-		if(line_length > 2)
-			dat += "</tr><tr>"
-			line_length = 1
-
-		dat += "<td><A href='?src=[UID()];category=[C];menu=[AUTOLATHE_CATEGORY_MENU]'>[C]</A></td>"
-		line_length++
-
-	dat += "</tr></table></div>"
-	dat += "</td>"
-	dat += get_queue()
-	dat += "</tr></table>"
-	return dat
-
-/obj/machinery/autolathe/proc/category_win(mob/user,var/selected_category)
-	var/dat = "<table style='width:100%'><tr><td valign='top' style='margin-right: 300px'>"
-	dat += "<div class='statusDisplay'>"
-	dat += "<A href='?src=[UID()];menu=[AUTOLATHE_MAIN_MENU]'>Return to main menu</A>"
-	dat += "<h3>Browsing [selected_category]:</h3><br>"
-	dat += "<b>Total amount:</b> [materials.total_amount] / [materials.max_amount] cm<sup>3</sup><br>"
-	dat += "<b>Metal amount:</b> [materials.amount(MAT_METAL)] cm<sup>3</sup><br>"
-	dat += "<b>Glass amount:</b> [materials.amount(MAT_GLASS)] cm<sup>3</sup><br>"
-
-	for(var/v in files.known_designs)
-		var/datum/design/D = files.known_designs[v]
-		if(!(selected_category in D.category))
-			continue
-
-		if(disabled || !can_build(D))
-			dat += "<span class='linkOff'>[D.name]</span>"
-		else
-			dat += "<a href='?src=[UID()];make=[D.id];multiplier=1'>[D.name]</a>"
-
-		if(ispath(D.build_path, /obj/item/stack))
-			var/max_multiplier = min(D.maxstack, D.materials[MAT_METAL] ?round(materials.amount(MAT_METAL)/D.materials[MAT_METAL]):INFINITY,D.materials[MAT_GLASS]?round(materials.amount(MAT_GLASS)/D.materials[MAT_GLASS]):INFINITY)
-			if(max_multiplier>10 && !disabled)
-				dat += " <a href='?src=[UID()];make=[D.id];multiplier=10'>x10</a>"
-			if(max_multiplier>25 && !disabled)
-				dat += " <a href='?src=[UID()];make=[D.id];multiplier=25'>x25</a>"
-			if(max_multiplier > 0 && !disabled)
-				dat += " <a href='?src=[UID()];make=[D.id];multiplier=[max_multiplier]'>x[max_multiplier]</a>"
-
-		dat += "[get_design_cost(D)]<br>"
-
-	dat += "</div>"
-	dat += "</td>"
-	dat += get_queue()
-	dat += "</tr></table>"
-	return dat
-
-/obj/machinery/autolathe/proc/search_win(mob/user)
-	var/dat = "<table style='width:100%'><tr><td valign='top' style='margin-right: 300px'>"
-	dat += "<div class='statusDisplay'>"
-	dat += "<A href='?src=[UID()];menu=[AUTOLATHE_MAIN_MENU]'>Return to main menu</A>"
-	dat += "<h3>Search results:</h3><br>"
-	dat += "<b>Total amount:</b> [materials.total_amount] / [materials.max_amount] cm<sup>3</sup><br>"
-	dat += "<b>Metal amount:</b> [materials.amount(MAT_METAL)] cm<sup>3</sup><br>"
-	dat += "<b>Glass amount:</b> [materials.amount(MAT_GLASS)] cm<sup>3</sup><br>"
-
-	for(var/datum/design/D in matching_designs)
-		if(disabled || !can_build(D))
-			dat += "<span class='linkOff'>[D.name]</span>"
-		else
-			dat += "<a href='?src=[UID()];make=[D.id];multiplier=1'>[D.name]</a>"
-
-		if(ispath(D.build_path, /obj/item/stack))
-			var/max_multiplier = min(D.maxstack, D.materials[MAT_METAL] ?round(materials.amount(MAT_METAL)/D.materials[MAT_METAL]):INFINITY,D.materials[MAT_GLASS]?round(materials.amount(MAT_GLASS)/D.materials[MAT_GLASS]):INFINITY)
-			if(max_multiplier>10 && !disabled)
-				dat += " <a href='?src=[UID()];make=[D.id];multiplier=10'>x10</a>"
-			if(max_multiplier>25 && !disabled)
-				dat += " <a href='?src=[UID()];make=[D.id];multiplier=25'>x25</a>"
-			if(max_multiplier > 0 && !disabled)
-				dat += " <a href='?src=[UID()];make=[D.id];multiplier=[max_multiplier]'>x[max_multiplier]</a>"
-
-		dat += "[get_design_cost(D)]<br>"
-
-	dat += "</div>"
-	dat += "</td>"
-	dat += get_queue()
-	dat += "</tr></table>"
-	return dat
-
 /obj/machinery/autolathe/proc/get_design_cost(var/datum/design/D)
 	var/coeff = get_coeff(D)
-	var/dat
+	var/data = list("metal" = null, "glass" = null)
 	if(D.materials[MAT_METAL])
-		dat += "[D.materials[MAT_METAL] / coeff] metal "
+		data["metal"] = D.materials[MAT_METAL] / coeff
 	if(D.materials[MAT_GLASS])
-		dat += "[D.materials[MAT_GLASS] / coeff] glass"
-	return dat
+		data["glass"] = D.materials[MAT_GLASS] / coeff
+	return data
 
 /obj/machinery/autolathe/proc/adjust_hacked(var/hack)
 	hacked = hack
