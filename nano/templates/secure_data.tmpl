@@ -139,32 +139,32 @@ Used In File(s): \code\game\machinery\computer\security.dm
 				<span class="bad"><center>General Record Lost!</center></span>
 			{{else}}
 				<div class="statusDisplayRecords">
-					<div style="width:50%; display:inline-block;">
-						{{for data.general.fields}}
-							<div class="item">
-								<div class="itemLabel">
-									{{:value.field}}
+					<table style='width:100%'><tr>
+						<td valign='top' style='margin-right: 300px;'>
+							{{for data.general.fields}}
+								<div class="item">
+									<div class="itemLabel">
+										{{:value.field}}
+									</div>
+									<div class="itemContent">
+										{{:helper.link(value.value, value.name ? 'pencil' : 'user-times', {'field' : value.name}, value.name ? null : 'disabled')}}
+									</div>
 								</div>
-								<div class="itemContent">
-									{{:helper.link(value.value, value.name ? 'pencil' : 'user-times', {'field' : value.name}, value.name ? null : 'disabled')}}
+							{{/for}}
+						</td>
+						<td valign='middle' align='center' style='width: 300px;'>
+							{{if data.general.has_photos}}
+								<div style="text-align: center;">
+									<div style="display: inline-block;">{{:helper.link('Print photo', 'camera', {'print_p' : 1})}}</div>
 								</div>
-							</div>
-						{{/for}}
-					</div>
-					{{if data.general.photos.has_photos}}
-						<div style="width:50%; display:inline-block;">
-							<div style="text-align: center;">
-								<div style="display: inline-block;">{{:helper.link('Print photo', 'camera', {'print_p' : 1})}}</div>
-							</div>
-							<div style="text-align: center;">
-								<div style="display: inline-block;">
-									{{for data.general.photos}}
-										<img src={{:value.photo}} height=128 width=128 border=5>
-									{{/for}}
-								</div>
-							</div>
-						</div>
-					{{/if}}
+								{{for data.general.photos}}
+									{{if value.photo}}
+										<img src={{:value.photo}} height=96 width=96 border=5>
+									{{/if}}
+								{{/for}}
+							{{/if}}
+						</td>
+					</tr></table>
 				</div>
 			{{/if}}
 			

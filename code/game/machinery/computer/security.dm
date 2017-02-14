@@ -84,40 +84,45 @@
 									crimstat = "No record."
 							data["records"] += list(list("ref" = "\ref[R]", "id" = R.fields["id"], "name" = R.fields["name"], "rank" = R.fields["rank"], "fingerprint" = R.fields["fingerprint"], "background" = background, "crimstat" = crimstat))
 				if(SEC_DATA_RECORD)
-					var/general = list()
+					var/list/general = list()
+					data["general"] = general
 					if(istype(active1, /datum/data/record) && data_core.general.Find(active1))
-						general["fields"] = list()
-						general["fields"] += list(list("field" = "Name:", "value" = active1.fields["name"], "name" = "name"))
-						general["fields"] += list(list("field" = "ID:", "value" = active1.fields["id"], "name" = "id"))
-						general["fields"] += list(list("field" = "Sex:", "value" = active1.fields["sex"], "name" = "sex"))
-						general["fields"] += list(list("field" = "Age:", "value" = active1.fields["age"], "name" = "age"))
-						general["fields"] += list(list("field" = "Fingerprint:", "value" = active1.fields["fingerprint"], "name" = "fingerprint"))
-						general["fields"] += list(list("field" = "Physical Status:", "value" = active1.fields["p_stat"]))
-						general["fields"] += list(list("field" = "Mental Status:", "value" = active1.fields["m_stat"]))
-						general["photos"] += list(list("photo" = active1.fields["photo-south"]))
-						general["photos"] += list(list("photo" = active1.fields["photo-west"]))
-						general["photos"] += list("has_photos" = (active1.fields["photo-south"] && active1.fields["photo-west"]))
+						var/list/fields = list()
+						general["fields"] = fields
+						fields[++fields.len] = list("field" = "Name:", "value" = active1.fields["name"], "name" = "name")
+						fields[++fields.len] = list("field" = "ID:", "value" = active1.fields["id"], "name" = "id")
+						fields[++fields.len] = list("field" = "Sex:", "value" = active1.fields["sex"], "name" = "sex")
+						fields[++fields.len] = list("field" = "Age:", "value" = active1.fields["age"], "name" = "age")
+						fields[++fields.len] = list("field" = "Rank:", "value" = active1.fields["rank"], "name" = "rank")
+						fields[++fields.len] = list("field" = "Fingerprint:", "value" = active1.fields["fingerprint"], "name" = "fingerprint")
+						fields[++fields.len] = list("field" = "Physical Status:", "value" = active1.fields["p_stat"])
+						fields[++fields.len] = list("field" = "Mental Status:", "value" = active1.fields["m_stat"])
+						var/list/photos = list()
+						general["photos"] = photos
+						photos[++photos.len] = list("photo" = active1.fields["photo-south"])
+						photos[++photos.len] = list("photo" = active1.fields["photo-west"])
+						general["has_photos"] += (active1.fields["photo-south"] || active1.fields["photo-west"] ? 1 : 0)
 						general["empty"] = 0
 					else
 						general["empty"] = 1
-					data["general"] = general
 
-					var/security = list()
+					var/list/security = list()
+					data["security"] = security
 					if(istype(active2, /datum/data/record) && data_core.security.Find(active2))
-						security["fields"] = list()
-						security["fields"] += list(list("field" = "Criminal Status:", "value" = active2.fields["criminal"], "name" = "criminal", "line_break" = 1))
-						security["fields"] += list(list("field" = "Minor Crimes:", "value" = active2.fields["mi_crim"], "name" = "mi_crim", "line_break" = 0))
-						security["fields"] += list(list("field" = "Details:", "value" = active2.fields["mi_crim_d"], "name" = "mi_crim_d", "line_break" = 1))
-						security["fields"] += list(list("field" = "Major Crimes:", "value" = active2.fields["ma_crim"], "name" = "ma_crim", "line_break" = 0))
-						security["fields"] += list(list("field" = "Details:", "value" = active2.fields["ma_crim_d"], "name" = "ma_crim_d", "line_break" = 1))
-						security["fields"] += list(list("field" = "Important Notes:", "value" = active2.fields["notes"], "name" = "notes", "line_break" = 0))
+						var/list/fields = list()
+						security["fields"] = fields
+						fields[++fields.len] = list("field" = "Criminal Status:", "value" = active2.fields["criminal"], "name" = "criminal", "line_break" = 1)
+						fields[++fields.len] = list("field" = "Minor Crimes:", "value" = active2.fields["mi_crim"], "name" = "mi_crim", "line_break" = 0)
+						fields[++fields.len] = list("field" = "Details:", "value" = active2.fields["mi_crim_d"], "name" = "mi_crim_d", "line_break" = 1)
+						fields[++fields.len] = list("field" = "Major Crimes:", "value" = active2.fields["ma_crim"], "name" = "ma_crim", "line_break" = 0)
+						fields[++fields.len] = list("field" = "Details:", "value" = active2.fields["ma_crim_d"], "name" = "ma_crim_d", "line_break" = 1)
+						fields[++fields.len] = list("field" = "Important Notes:", "value" = active2.fields["notes"], "name" = "notes", "line_break" = 0)
 						if(!active2.fields["comments"] || !islist(active2.fields["comments"]))
 							active2.fields["comments"] = list()
 						security["comments"] = active2.fields["comments"]
 						security["empty"] = 0
 					else
 						security["empty"] = 1
-					data["security"] = security
 	return data
 
 /obj/machinery/computer/secure_data/Topic(href, href_list)
@@ -278,21 +283,21 @@
 				var/buttons = list()
 				buttons += list(list("name" = "Yes", "icon" = "check", "val" = "del_all2=1"))
 				buttons += list(list("name" = "No", "icon" = "times", "val" = null))
-				setTemp("<h3>Are you sure you wish to delete all records?</h3>", buttons, 1)
+				setTemp("Are you sure you wish to delete all records?", buttons, 1)
 
 			else if(href_list["del_rg"])
 				if(active1)
 					var/buttons = list()
 					buttons += list(list("name" = "Yes", "icon" = "check", "val" = "del_rg2=1"))
 					buttons += list(list("name" = "No", "icon" = "times", "val" = null))
-					setTemp("<h3>Are you sure you wish to delete the record (ALL)?</h3>", buttons, 1)
+					setTemp("Are you sure you wish to delete the record (ALL)?", buttons, 1)
 
 			else if(href_list["del_r"])
 				if(active1)
 					var/buttons = list()
 					buttons += list(list("name" = "Yes", "icon" = "check", "val" = "del_r2=1"))
 					buttons += list(list("name" = "No", "icon" = "times", "val" = null))
-					setTemp("<h3>Are you sure you wish to delete the record (Security Portion Only)?</h3>", buttons, 1)
+					setTemp("Are you sure you wish to delete the record (Security Portion Only)?", buttons, 1)
 
 			else if(href_list["new_s"])
 				if(istype(active1, /datum/data/record) && !istype(active2, /datum/data/record))
@@ -390,19 +395,19 @@
 						if(istype(active1, /datum/data/record))
 							var/t1 = reject_bad_name(input("Please input name:", "Secure. records", active1.fields["name"], null) as text)
 							if(!t1 || !!length(trim(t1)) || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return
+								return 1
 							active1.fields["name"] = t1
 					if("id")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please input id:", "Secure. records", active1.fields["id"], null) as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return
+								return 1
 							active1.fields["id"] = t1
 					if("fingerprint")
 						if(istype(active1, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please input fingerprint hash:", "Secure. records", active1.fields["fingerprint"], null) as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return
+								return 1
 							active1.fields["fingerprint"] = t1
 					if("sex")
 						if(istype(active1, /datum/data/record))
@@ -414,37 +419,37 @@
 						if(istype(active1, /datum/data/record))
 							var/t1 = input("Please input age:", "Secure. records", active1.fields["age"], null) as num
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return
+								return 1
 							active1.fields["age"] = t1
 					if("mi_crim")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please input minor crimes list:", "Secure. records", active2.fields["mi_crim"], null) as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["mi_crim"] = t1
 					if("mi_crim_d")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please summarize minor crimes:", "Secure. records", active2.fields["mi_crim_d"], null) as message)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["mi_crim_d"] = t1
 					if("ma_crim")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please input major crimes list:", "Secure. records", active2.fields["ma_crim"], null) as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["ma_crim"] = t1
 					if("ma_crim_d")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please summarize major crimes:", "Secure. records", active2.fields["ma_crim_d"], null) as message)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["ma_crim_d"] = t1
 					if("notes")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(html_encode(trim(input("Please summarize notes:", "Secure. records", html_decode(active2.fields["notes"]), null) as message)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["notes"] = t1
 					if("criminal")
 						if(istype(active2, /datum/data/record))

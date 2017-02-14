@@ -57,49 +57,54 @@
 			switch(screen)
 				if(MED_DATA_R_LIST)
 					if(!isnull(data_core.general))
-						data["records"] = list()
+						var/list/records = list()
+						data["records"] = records
 						for(var/datum/data/record/R in sortRecord(data_core.general))
-							data["records"] += list(list("ref" = "\ref[R]", "id" = R.fields["id"], "name" = R.fields["name"]))
+							records[++records.len] = list("ref" = "\ref[R]", "id" = R.fields["id"], "name" = R.fields["name"])
 				if(MED_DATA_RECORD)
-					var/general = list()
+					var/list/general = list()
+					data["general"] = general
 					if(istype(active1, /datum/data/record) && data_core.general.Find(active1))
-						general["fields"] = list()
-						general["fields"] += list(list("field" = "Name:", "value" = active1.fields["name"]))
-						general["fields"] += list(list("field" = "ID:", "value" = active1.fields["id"]))
-						general["fields"] += list(list("field" = "Sex:", "value" = active1.fields["sex"], "name" = "sex"))
-						general["fields"] += list(list("field" = "Age:", "value" = active1.fields["age"], "name" = "age"))
-						general["fields"] += list(list("field" = "Fingerprint:", "value" = active1.fields["fingerprint"], "name" = "fingerprint"))
-						general["fields"] += list(list("field" = "Physical Status:", "value" = active1.fields["p_stat"], "name" = "p_stat"))
-						general["fields"] += list(list("field" = "Mental Status:", "value" = active1.fields["m_stat"], "name" = "m_stat"))
-						general["photos"] += list(list("photo" = active1.fields["photo-south"]))
-						general["photos"] += list(list("photo" = active1.fields["photo-west"]))
-						general["photos"] += list("has_photos" = (active1.fields["photo-south"] && active1.fields["photo-west"]))
+						var/list/fields = list()
+						general["fields"] = fields
+						fields[++fields.len] = list("field" = "Name:", "value" = active1.fields["name"])
+						fields[++fields.len] = list("field" = "ID:", "value" = active1.fields["id"])
+						fields[++fields.len] = list("field" = "Sex:", "value" = active1.fields["sex"], "name" = "sex")
+						fields[++fields.len] = list("field" = "Age:", "value" = active1.fields["age"], "name" = "age")
+						fields[++fields.len] = list("field" = "Fingerprint:", "value" = active1.fields["fingerprint"], "name" = "fingerprint")
+						fields[++fields.len] = list("field" = "Physical Status:", "value" = active1.fields["p_stat"], "name" = "p_stat")
+						fields[++fields.len] = list("field" = "Mental Status:", "value" = active1.fields["m_stat"], "name" = "m_stat")
+						var/list/photos = list()
+						general["photos"] = photos
+						photos[++photos.len] = list("photo" = active1.fields["photo-south"])
+						photos[++photos.len] = list("photo" = active1.fields["photo-west"])
+						general["has_photos"] = (active1.fields["photo-south"] || active1.fields["photo-west"] ? 1 : 0)
 						general["empty"] = 0
 					else
 						general["empty"] = 1
-					data["general"] = general
 
-					var/medical = list()
+					var/list/medical = list()
+					data["medical"] = medical
 					if(istype(active2, /datum/data/record) && data_core.medical.Find(active2))
-						medical["fields"] = list()
-						medical["fields"] += list(list("field" = "Blood Type:", "value" = active2.fields["b_type"], "name" = "b_type", "line_break" = 0))
-						medical["fields"] += list(list("field" = "DNA:", "value" = active2.fields["b_dna"], "name" = "b_dna", "line_break" = 1))
-						medical["fields"] += list(list("field" = "Minor Disabilities:", "value" = active2.fields["mi_dis"], "name" = "mi_dis", "line_break" = 0))
-						medical["fields"] += list(list("field" = "Details:", "value" = active2.fields["mi_dis_d"], "name" = "mi_dis_d", "line_break" = 1))
-						medical["fields"] += list(list("field" = "Major Disabilities:", "value" = active2.fields["ma_dis"], "name" = "ma_dis", "line_break" = 0))
-						medical["fields"] += list(list("field" = "Details:", "value" = active2.fields["ma_dis_d"], "name" = "ma_dis_d", "line_break" = 1))
-						medical["fields"] += list(list("field" = "Allergies:", "value" = active2.fields["alg"], "name" = "alg", "line_break" = 0))
-						medical["fields"] += list(list("field" = "Details:", "value" = active2.fields["alg_d"], "name" = "alg_d", "line_break" = 1))
-						medical["fields"] += list(list("field" = "Current Diseases:", "value" = active2.fields["cdi"], "name" = "cdi", "line_break" = 0))
-						medical["fields"] += list(list("field" = "Details:", "value" = active2.fields["cdi_d"], "name" = "cdi_d", "line_break" = 1))
-						medical["fields"] += list(list("field" = "Important Notes:", "value" = active2.fields["notes"], "name" = "notes", "line_break" = 0))
+						var/list/fields = list()
+						medical["fields"] = fields
+						fields[++fields.len] = list("field" = "Blood Type:", "value" = active2.fields["b_type"], "name" = "b_type", "line_break" = 0)
+						fields[++fields.len] = list("field" = "DNA:", "value" = active2.fields["b_dna"], "name" = "b_dna", "line_break" = 1)
+						fields[++fields.len] = list("field" = "Minor Disabilities:", "value" = active2.fields["mi_dis"], "name" = "mi_dis", "line_break" = 0)
+						fields[++fields.len] = list("field" = "Details:", "value" = active2.fields["mi_dis_d"], "name" = "mi_dis_d", "line_break" = 1)
+						fields[++fields.len] = list("field" = "Major Disabilities:", "value" = active2.fields["ma_dis"], "name" = "ma_dis", "line_break" = 0)
+						fields[++fields.len] = list("field" = "Details:", "value" = active2.fields["ma_dis_d"], "name" = "ma_dis_d", "line_break" = 1)
+						fields[++fields.len] = list("field" = "Allergies:", "value" = active2.fields["alg"], "name" = "alg", "line_break" = 0)
+						fields[++fields.len] = list("field" = "Details:", "value" = active2.fields["alg_d"], "name" = "alg_d", "line_break" = 1)
+						fields[++fields.len] = list("field" = "Current Diseases:", "value" = active2.fields["cdi"], "name" = "cdi", "line_break" = 0)
+						fields[++fields.len] = list("field" = "Details:", "value" = active2.fields["cdi_d"], "name" = "cdi_d", "line_break" = 1)
+						fields[++fields.len] = list("field" = "Important Notes:", "value" = active2.fields["notes"], "name" = "notes", "line_break" = 0)
 						if(!active2.fields["comments"] || !islist(active2.fields["comments"]))
 							active2.fields["comments"] = list()
 						medical["comments"] = active2.fields["comments"]
 						medical["empty"] = 0
 					else
 						medical["empty"] = 1
-					data["medical"] = medical
 				if(MED_DATA_V_DATA)
 					data["virus"] = list()
 					for(var/D in typesof(/datum/disease))
@@ -286,7 +291,7 @@
 				var/buttons = list()
 				buttons += list(list("name" = "Yes", "icon" = "check", "val" = "del_all2=1"))
 				buttons += list(list("name" = "No", "icon" = "times", "val" = null))
-				setTemp("<h3>Are you sure you wish to delete all records?</h3>", buttons, 1)
+				setTemp("Are you sure you wish to delete all records?", buttons, 1)
 
 			if(href_list["field"])
 				var/a1 = active1
@@ -296,7 +301,7 @@
 						if(istype(active1, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please input fingerprint hash:", "Med. records", active1.fields["fingerprint"], null) as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return
+								return 1
 							active1.fields["fingerprint"] = t1
 					if("sex")
 						if(istype(active1, /datum/data/record))
@@ -308,61 +313,61 @@
 						if(istype(active1, /datum/data/record))
 							var/t1 = input("Please input age:", "Med. records", active1.fields["age"], null) as num
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return
+								return 1
 							active1.fields["age"] = t1
 					if("mi_dis")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please input minor disabilities list:", "Med. records", active2.fields["mi_dis"], null) as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["mi_dis"] = t1
 					if("mi_dis_d")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please summarize minor dis.:", "Med. records", active2.fields["mi_dis_d"], null) as message)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["mi_dis_d"] = t1
 					if("ma_dis")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please input major diabilities list:", "Med. records", active2.fields["ma_dis"], null) as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["ma_dis"] = t1
 					if("ma_dis_d")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please summarize major dis.:", "Med. records", active2.fields["ma_dis_d"], null) as message)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["ma_dis_d"] = t1
 					if("alg")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please state allergies:", "Med. records", active2.fields["alg"], null) as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["alg"] = t1
 					if("alg_d")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please summarize allergies:", "Med. records", active2.fields["alg_d"], null) as message)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["alg_d"] = t1
 					if("cdi")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please state diseases:", "Med. records", active2.fields["cdi"], null) as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["cdi"] = t1
 					if("cdi_d")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(trim(sanitize(input("Please summarize diseases:", "Med. records", active2.fields["cdi_d"], null) as message)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["cdi_d"] = t1
 					if("notes")
 						if(istype(active2, /datum/data/record))
 							var/t1 = copytext(html_encode(trim(input("Please summarize notes:", "Med. records", html_decode(active2.fields["notes"]), null) as message)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return
+								return 1
 							active2.fields["notes"] = t1
 					if("p_stat")
 						if(istype(active1, /datum/data/record))
@@ -395,23 +400,23 @@
 							setTemp("<h3>Blood Type</h3>", buttons)
 					if("b_dna")
 						if(istype(active1, /datum/data/record))
-							var/t1 = copytext(trim(sanitize(input("Please input DNA hash:", "Med. records", active1.fields["dna"], null) as text)), 1, MAX_MESSAGE_LEN)
+							var/t1 = copytext(trim(sanitize(input("Please input DNA hash:", "Med. records", active2.fields["b_dna"], null) as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return
+								return 1
 							active1.fields["dna"] = t1
 					if("vir_name")
 						var/datum/data/record/v = locate(href_list["edit_vir"])
 						if(v)
 							var/t1 = copytext(trim(sanitize(input("Please input pathogen name:", "VirusDB", v.fields["name"], null)  as text)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return
+								return 1
 							v.fields["name"] = t1
 					if("vir_desc")
 						var/datum/data/record/v = locate(href_list["edit_vir"])
 						if(v)
 							var/t1 = copytext(trim(sanitize(input("Please input information about pathogen:", "VirusDB", v.fields["description"], null) as message)), 1, MAX_MESSAGE_LEN)
 							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return
+								return 1
 							v.fields["description"] = t1
 
 			if(href_list["del_r"])
@@ -419,15 +424,14 @@
 					var/buttons = list()
 					buttons += list(list("name" = "Yes", "icon" = "check", "val" = "del_r2=1"))
 					buttons += list(list("name" = "No", "icon" = "times", "val" = null))
-					setTemp("<h3>Are you sure you wish to delete the record (Medical Portion Only)?</h3>", buttons, 1)
+					setTemp("Are you sure you wish to delete the record (Medical Portion Only)?", buttons, 1)
 
 			if(href_list["d_rec"])
 				var/datum/data/record/R = locate(href_list["d_rec"])
 				var/datum/data/record/M = locate(href_list["d_rec"])
 				if(!data_core.general.Find(R))
 					temp = list("text" = "Record Not Found!", "buttons" = list())
-					nanomanager.update_uis(src)
-					return
+					return 1
 				for(var/datum/data/record/E in data_core.medical)
 					if(E.fields["name"] == R.fields["name"] && E.fields["id"] == R.fields["id"])
 						M = E
@@ -458,11 +462,11 @@
 
 			if(href_list["add_c"])
 				if(!istype(active2, /datum/data/record))
-					return
+					return 1
 				var/a2 = active2
 				var/t1 = copytext(trim(sanitize(input("Add Comment:", "Med. records", null, null) as message)), 1, MAX_MESSAGE_LEN)
 				if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-					return
+					return 1
 				active2.fields["comments"] += "Made by [authenticated] ([rank]) on [current_date_string] [worldtime2text()]<BR>[t1]"
 
 			if(href_list["del_c"])
@@ -473,8 +477,7 @@
 			if(href_list["search"])
 				var/t1 = input("Search String: (Name, DNA, or ID)", "Med. records", null, null) as text
 				if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)))
-					nanomanager.update_uis(src)
-					return
+					return 1
 				active1 = null
 				active2 = null
 				t1 = lowertext(t1)
@@ -530,8 +533,7 @@
 					printing = 0
 
 	add_fingerprint(usr)
-	nanomanager.update_uis(src)
-	return
+	return 1
 
 /obj/machinery/computer/med_data/proc/setTemp(text, list/buttons = list(), notice = 0)
 	temp = list("text" = text, "buttons" = buttons, "has_buttons" = buttons.len > 0, "notice" = notice)
