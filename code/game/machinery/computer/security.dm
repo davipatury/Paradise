@@ -1,6 +1,6 @@
-#define SEC_DATA_R_LIST	1	// Main menu
-#define SEC_DATA_MAINT	2	// Record list
-#define SEC_DATA_RECORD	3	// Records maintenance
+#define SEC_DATA_R_LIST	1	// Record list
+#define SEC_DATA_MAINT	2	// Records maintenance
+#define SEC_DATA_RECORD	3	// Record
 
 /obj/machinery/computer/secure_data//TODO:SANITY
 	name = "security records"
@@ -54,75 +54,74 @@
 /obj/machinery/computer/secure_data/ui_data(mob/user, ui_key = "main", datum/topic_state/state = default_state)
 	var/data[0]
 	data["temp"] = temp
-	if(!temp)
-		data["scan"] = scan ? scan.name : null
-		data["authenticated"] = authenticated
-		data["screen"] = screen
-		if(authenticated)
-			switch(screen)
-				if(SEC_DATA_R_LIST)
-					if(!isnull(data_core.general))
-						for(var/datum/data/record/R in sortRecord(data_core.general, sortBy, order))
-							var/crimstat = "null"
-							for(var/datum/data/record/E in data_core.security)
-								if(E.fields["name"] == R.fields["name"] && E.fields["id"] == R.fields["id"])
-									crimstat = E.fields["criminal"]
-									break
-							var/background = "''"
-							switch(crimstat)
-								if("*Arrest*")
-									background = "'background-color:#890E26'"
-								if("Incarcerated")
-									background = "'background-color:#743B03'"
-								if("Parolled")
-									background = "'background-color:#743B03'"
-								if("Released")
-									background = "'background-color:#216489'"
-								if("None")
-									background = "'background-color:#007f47'"
-								if("null")
-									crimstat = "No record."
-							data["records"] += list(list("ref" = "\ref[R]", "id" = R.fields["id"], "name" = R.fields["name"], "rank" = R.fields["rank"], "fingerprint" = R.fields["fingerprint"], "background" = background, "crimstat" = crimstat))
-				if(SEC_DATA_RECORD)
-					var/list/general = list()
-					data["general"] = general
-					if(istype(active1, /datum/data/record) && data_core.general.Find(active1))
-						var/list/fields = list()
-						general["fields"] = fields
-						fields[++fields.len] = list("field" = "Name:", "value" = active1.fields["name"], "name" = "name")
-						fields[++fields.len] = list("field" = "ID:", "value" = active1.fields["id"], "name" = "id")
-						fields[++fields.len] = list("field" = "Sex:", "value" = active1.fields["sex"], "name" = "sex")
-						fields[++fields.len] = list("field" = "Age:", "value" = active1.fields["age"], "name" = "age")
-						fields[++fields.len] = list("field" = "Rank:", "value" = active1.fields["rank"], "name" = "rank")
-						fields[++fields.len] = list("field" = "Fingerprint:", "value" = active1.fields["fingerprint"], "name" = "fingerprint")
-						fields[++fields.len] = list("field" = "Physical Status:", "value" = active1.fields["p_stat"])
-						fields[++fields.len] = list("field" = "Mental Status:", "value" = active1.fields["m_stat"])
-						var/list/photos = list()
-						general["photos"] = photos
-						photos[++photos.len] = list("photo" = active1.fields["photo-south"])
-						photos[++photos.len] = list("photo" = active1.fields["photo-west"])
-						general["has_photos"] += (active1.fields["photo-south"] || active1.fields["photo-west"] ? 1 : 0)
-						general["empty"] = 0
-					else
-						general["empty"] = 1
+	data["scan"] = scan ? scan.name : null
+	data["authenticated"] = authenticated
+	data["screen"] = screen
+	if(authenticated)
+		switch(screen)
+			if(SEC_DATA_R_LIST)
+				if(!isnull(data_core.general))
+					for(var/datum/data/record/R in sortRecord(data_core.general, sortBy, order))
+						var/crimstat = "null"
+						for(var/datum/data/record/E in data_core.security)
+							if(E.fields["name"] == R.fields["name"] && E.fields["id"] == R.fields["id"])
+								crimstat = E.fields["criminal"]
+								break
+						var/background = "''"
+						switch(crimstat)
+							if("*Arrest*")
+								background = "'background-color:#890E26'"
+							if("Incarcerated")
+								background = "'background-color:#743B03'"
+							if("Parolled")
+								background = "'background-color:#743B03'"
+							if("Released")
+								background = "'background-color:#216489'"
+							if("None")
+								background = "'background-color:#007f47'"
+							if("null")
+								crimstat = "No record."
+						data["records"] += list(list("ref" = "\ref[R]", "id" = R.fields["id"], "name" = R.fields["name"], "rank" = R.fields["rank"], "fingerprint" = R.fields["fingerprint"], "background" = background, "crimstat" = crimstat))
+			if(SEC_DATA_RECORD)
+				var/list/general = list()
+				data["general"] = general
+				if(istype(active1, /datum/data/record) && data_core.general.Find(active1))
+					var/list/fields = list()
+					general["fields"] = fields
+					fields[++fields.len] = list("field" = "Name:", "value" = active1.fields["name"], "name" = "name")
+					fields[++fields.len] = list("field" = "ID:", "value" = active1.fields["id"], "name" = "id")
+					fields[++fields.len] = list("field" = "Sex:", "value" = active1.fields["sex"], "name" = "sex")
+					fields[++fields.len] = list("field" = "Age:", "value" = active1.fields["age"], "name" = "age")
+					fields[++fields.len] = list("field" = "Rank:", "value" = active1.fields["rank"], "name" = "rank")
+					fields[++fields.len] = list("field" = "Fingerprint:", "value" = active1.fields["fingerprint"], "name" = "fingerprint")
+					fields[++fields.len] = list("field" = "Physical Status:", "value" = active1.fields["p_stat"])
+					fields[++fields.len] = list("field" = "Mental Status:", "value" = active1.fields["m_stat"])
+					var/list/photos = list()
+					general["photos"] = photos
+					photos[++photos.len] = list("photo" = active1.fields["photo-south"])
+					photos[++photos.len] = list("photo" = active1.fields["photo-west"])
+					general["has_photos"] += (active1.fields["photo-south"] || active1.fields["photo-west"] ? 1 : 0)
+					general["empty"] = 0
+				else
+					general["empty"] = 1
 
-					var/list/security = list()
-					data["security"] = security
-					if(istype(active2, /datum/data/record) && data_core.security.Find(active2))
-						var/list/fields = list()
-						security["fields"] = fields
-						fields[++fields.len] = list("field" = "Criminal Status:", "value" = active2.fields["criminal"], "name" = "criminal", "line_break" = 1)
-						fields[++fields.len] = list("field" = "Minor Crimes:", "value" = active2.fields["mi_crim"], "name" = "mi_crim", "line_break" = 0)
-						fields[++fields.len] = list("field" = "Details:", "value" = active2.fields["mi_crim_d"], "name" = "mi_crim_d", "line_break" = 1)
-						fields[++fields.len] = list("field" = "Major Crimes:", "value" = active2.fields["ma_crim"], "name" = "ma_crim", "line_break" = 0)
-						fields[++fields.len] = list("field" = "Details:", "value" = active2.fields["ma_crim_d"], "name" = "ma_crim_d", "line_break" = 1)
-						fields[++fields.len] = list("field" = "Important Notes:", "value" = active2.fields["notes"], "name" = "notes", "line_break" = 0)
-						if(!active2.fields["comments"] || !islist(active2.fields["comments"]))
-							active2.fields["comments"] = list()
-						security["comments"] = active2.fields["comments"]
-						security["empty"] = 0
-					else
-						security["empty"] = 1
+				var/list/security = list()
+				data["security"] = security
+				if(istype(active2, /datum/data/record) && data_core.security.Find(active2))
+					var/list/fields = list()
+					security["fields"] = fields
+					fields[++fields.len] = list("field" = "Criminal Status:", "value" = active2.fields["criminal"], "name" = "criminal", "line_break" = 1)
+					fields[++fields.len] = list("field" = "Minor Crimes:", "value" = active2.fields["mi_crim"], "name" = "mi_crim", "line_break" = 0)
+					fields[++fields.len] = list("field" = "Details:", "value" = active2.fields["mi_crim_d"], "name" = "mi_crim_d", "line_break" = 1)
+					fields[++fields.len] = list("field" = "Major Crimes:", "value" = active2.fields["ma_crim"], "name" = "ma_crim", "line_break" = 0)
+					fields[++fields.len] = list("field" = "Details:", "value" = active2.fields["ma_crim_d"], "name" = "ma_crim_d", "line_break" = 1)
+					fields[++fields.len] = list("field" = "Important Notes:", "value" = active2.fields["notes"], "name" = "notes", "line_break" = 0)
+					if(!active2.fields["comments"] || !islist(active2.fields["comments"]))
+						active2.fields["comments"] = list()
+					security["comments"] = active2.fields["comments"]
+					security["empty"] = 0
+				else
+					security["empty"] = 1
 	return data
 
 /obj/machinery/computer/secure_data/Topic(href, href_list)
@@ -131,358 +130,347 @@
 
 	if(!data_core.general.Find(active1))
 		active1 = null
-
 	if(!data_core.security.Find(active2))
 		active2 = null
 
-	if((usr.contents.Find(src) || (in_range(src, usr) && isturf(loc))) || (issilicon(usr)))
-		usr.set_machine(src)
+	if(href_list["temp"])
+		temp = null
 
-		if(href_list["temp"])
-			temp = null
-
+	if(href_list["temp_action"])
 		if(href_list["temp_action"])
-			if(href_list["temp_action"])
-				var/prm = splittext(href_list["temp_action"], "=")
-				switch(prm[1])
-					if("del_all2")
-						for(var/datum/data/record/R in data_core.security)
-							qdel(R)
-						temp = list("text" = "All records deleted.", "buttons" = list())
-					if("del_r2")
-						if(active2)
-							qdel(active2)
-					if("del_rg2")
-						if(active1)
-							for(var/datum/data/record/R in data_core.medical)
-								if(R.fields["name"] == active1.fields["name"] && R.fields["id"] == active1.fields["id"])
-									qdel(R)
-							qdel(active1)
-						if(active2)
-							qdel(active2)
-					if("criminal")
-						if(active2)
-							switch(prm[2])
-								if("none")
-									active2.fields["criminal"] = "None"
-								if("arrest")
-									active2.fields["criminal"] = "*Arrest*"
-								if("incarcerated")
-									active2.fields["criminal"] = "Incarcerated"
-								if("parolled")
-									active2.fields["criminal"] = "Parolled"
-								if("released")
-									active2.fields["criminal"] = "Released"
-
-							for(var/mob/living/carbon/human/H in mob_list)
-								H.sec_hud_set_security_status()
-					if("rank")
-						if(active1)
-							active1.fields["rank"] = prm[2]
-							if(prm[2] in joblist)
-								active1.fields["real_rank"] = prm[2]
-
-		if(href_list["scan"])
-			if(scan)
-				scan.forceMove(loc)
-				if(ishuman(usr))
-					if(!usr.get_active_hand())
-						usr.put_in_hands(scan)
-				scan = null
-			else
-				var/obj/item/I = usr.get_active_hand()
-				if(istype(I, /obj/item/weapon/card/id))
-					usr.drop_item()
-					I.forceMove(src)
-					scan = I
-
-		if(href_list["login"])
-			if(isAI(usr))
-				active1 = null
-				active2 = null
-				authenticated = usr.name
-				rank = "AI"
-				screen = SEC_DATA_R_LIST
-
-			else if(isrobot(usr))
-				active1 = null
-				active2 = null
-				authenticated = usr.name
-				var/mob/living/silicon/robot/R = usr
-				rank = "[R.modtype] [R.braintype]"
-				screen = SEC_DATA_R_LIST
-
-			else if(istype(scan, /obj/item/weapon/card/id))
-				active1 = null
-				active2 = null
-
-				if(check_access(scan))
-					authenticated = scan.registered_name
-					rank = scan.assignment
+			var/prm = splittext(href_list["temp_action"], "=")
+			switch(prm[1])
+				if("del_all2")
+					for(var/datum/data/record/R in data_core.security)
+						qdel(R)
+					temp = list("text" = "<h3>All records deleted.</h3>")
+				if("del_r2")
+					if(active2)
+						qdel(active2)
+				if("del_rg2")
+					if(active1)
+						for(var/datum/data/record/R in data_core.medical)
+							if(R.fields["name"] == active1.fields["name"] && R.fields["id"] == active1.fields["id"])
+								qdel(R)
+						qdel(active1)
+					if(active2)
+						qdel(active2)
 					screen = SEC_DATA_R_LIST
+				if("criminal")
+					if(active2)
+						switch(prm[2])
+							if("none")
+								active2.fields["criminal"] = "None"
+							if("arrest")
+								active2.fields["criminal"] = "*Arrest*"
+							if("incarcerated")
+								active2.fields["criminal"] = "Incarcerated"
+							if("parolled")
+								active2.fields["criminal"] = "Parolled"
+							if("released")
+								active2.fields["criminal"] = "Released"
+
+						for(var/mob/living/carbon/human/H in mob_list)
+							H.sec_hud_set_security_status()
+				if("rank")
+					if(active1)
+						active1.fields["rank"] = prm[2]
+						if(prm[2] in joblist)
+							active1.fields["real_rank"] = prm[2]
+
+	if(href_list["scan"])
+		if(scan)
+			scan.forceMove(loc)
+			if(ishuman(usr) && !usr.get_active_hand())
+				usr.put_in_hands(scan)
+			scan = null
+		else
+			var/obj/item/I = usr.get_active_hand()
+			if(istype(I, /obj/item/weapon/card/id))
+				usr.drop_item()
+				I.forceMove(src)
+				scan = I
+
+	if(href_list["login"])
+		if(isAI(usr))
+			authenticated = usr.name
+			rank = "AI"
+		else if(isrobot(usr))
+			authenticated = usr.name
+			var/mob/living/silicon/robot/R = usr
+			rank = "[R.modtype] [R.braintype]"
+		else if(istype(scan, /obj/item/weapon/card/id))
+			if(check_access(scan))
+				authenticated = scan.registered_name
+				rank = scan.assignment
 
 		if(authenticated)
-			if(href_list["logout"])
-				authenticated = null
-				screen = null
-				active1 = null
-				active2 = null
+			active1 = null
+			active2 = null
+			screen = MED_DATA_MAIN
 
-			else if(href_list["sort"])
-				// Reverse the order if clicked twice
-				if(sortBy == href_list["sort"])
-					if(order == 1)
-						order = -1
-					else
-						order = 1
+	if(authenticated)
+		var/incapable = (usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)))
+		if(href_list["logout"])
+			authenticated = null
+			screen = null
+			active1 = null
+			active2 = null
+
+		else if(href_list["sort"])
+			// Reverse the order if clicked twice
+			if(sortBy == href_list["sort"])
+				if(order == 1)
+					order = -1
 				else
-					sortBy = href_list["sort"]
-					order = initial(order)
+					order = 1
+			else
+				sortBy = href_list["sort"]
+				order = initial(order)
 
-			else if(href_list["screen"])
-				screen = text2num(href_list["screen"])
-				if(screen < 1)
-					screen = SEC_DATA_R_LIST
+		else if(href_list["screen"])
+			screen = text2num(href_list["screen"])
+			if(screen < 1)
+				screen = SEC_DATA_R_LIST
 
-				active1 = null
-				active2 = null
+			active1 = null
+			active2 = null
 
-			else if(href_list["d_rec"])
-				var/datum/data/record/R = locate(href_list["d_rec"])
-				var/datum/data/record/M = locate(href_list["d_rec"])
-				if(!data_core.general.Find(R))
-					temp = list("text" = "Record not found!", "buttons" = list())
-					nanomanager.update_uis(src)
-					return
+		else if(href_list["d_rec"])
+			var/datum/data/record/R = locate(href_list["d_rec"])
+			var/datum/data/record/M = locate(href_list["d_rec"])
+			if(!data_core.general.Find(R))
+				setTemp("<h3><span class='bad'>Record not found!</span></h3>")
+				return 1
+			for(var/datum/data/record/E in data_core.security)
+				if(E.fields["name"] == R.fields["name"] && E.fields["id"] == R.fields["id"])
+					M = E
+			active1 = R
+			active2 = M
+			screen = SEC_DATA_RECORD
+
+		/*else if("s_fingerprint")
+			var/t1 = input("Search String: (Fingerprint)", "Secure. records", null, null)  as text
+			if(!t1 || usr.stat || !authenticated || usr.restrained() || (!in_range(src, usr) && (!issilicon(usr)))
+				return
+			active1 = null
+			active2 = null
+			t1 = lowertext(t1)
+			for(var/datum/data/record/R in data_core.general)
+				if(lowertext(R.fields["fingerprint"]) == t1)
+					active1 = R
+			if(!active1)
+				temp = "Could not locate record [t1]."
+			else
 				for(var/datum/data/record/E in data_core.security)
-					if(E.fields["name"] == R.fields["name"] && E.fields["id"] == R.fields["id"])
-						M = E
-				active1 = R
-				active2 = M
+					if((E.fields["name"] == active1.fields["name"] || E.fields["id"] == active1.fields["id"]))
+						active2 = E
+				screen = SEC_DATA_RECORD	*/
+
+		else if(href_list["del_all"])
+			var/list/buttons = list()
+			buttons[++buttons.len] = list("name" = "Yes", "icon" = "check", "val" = "del_all2=1", "status" = null)
+			buttons[++buttons.len] = list("name" = "No", "icon" = "times", "val" = null, "status" = null)
+			setTemp("<h3>Are you sure you wish to delete all records?</h3>", buttons)
+
+		else if(href_list["del_rg"])
+			if(active1)
+				var/list/buttons = list()
+				buttons[++buttons.len] = list("name" = "Yes", "icon" = "check", "val" = "del_rg2=1", "status" = null)
+				buttons[++buttons.len] = list("name" = "No", "icon" = "times", "val" = null, "status" = null)
+				setTemp("<h3>Are you sure you wish to delete the record (ALL)?</h3>", buttons)
+
+		else if(href_list["del_r"])
+			if(active1)
+				var/list/buttons = list()
+				buttons[++buttons.len] = list("name" = "Yes", "icon" = "check", "val" = "del_r2=1", "status" = null)
+				buttons[++buttons.len] = list("name" = "No", "icon" = "times", "val" = null, "status" = null)
+				setTemp("<h3>Are you sure you wish to delete the record (Security Portion Only)?</h3>", buttons)
+
+		else if(href_list["new_s"])
+			if(istype(active1, /datum/data/record) && !istype(active2, /datum/data/record))
+				var/datum/data/record/R = new /datum/data/record()
+				R.fields["name"] = active1.fields["name"]
+				R.fields["id"] = active1.fields["id"]
+				R.name = "Security Record #[R.fields["id"]]"
+				R.fields["criminal"] = "None"
+				R.fields["mi_crim"] = "None"
+				R.fields["mi_crim_d"] = "No minor crime convictions."
+				R.fields["ma_crim"] = "None"
+				R.fields["ma_crim_d"] = "No major crime convictions."
+				R.fields["notes"] = "No notes."
+				data_core.security += R
+				active2 = R
 				screen = SEC_DATA_RECORD
 
-			/*else if("s_fingerprint")
-				var/t1 = input("Search String: (Fingerprint)", "Secure. records", null, null)  as text
-				if(!t1 || usr.stat || !authenticated || usr.restrained() || (!in_range(src, usr) && (!issilicon(usr)))
-					return
-				active1 = null
-				active2 = null
-				t1 = lowertext(t1)
-				for(var/datum/data/record/R in data_core.general)
-					if(lowertext(R.fields["fingerprint"]) == t1)
-						active1 = R
-				if(!active1)
-					temp = "Could not locate record [t1]."
+		else if(href_list["new_g"])
+			var/datum/data/record/G = new /datum/data/record()
+			G.fields["name"] = "New Record"
+			G.fields["id"] = "[add_zero(num2hex(rand(1, 1.6777215E7)), 6)]"
+			G.fields["rank"] = "Unassigned"
+			G.fields["real_rank"] = "Unassigned"
+			G.fields["sex"] = "Male"
+			G.fields["age"] = "Unknown"
+			G.fields["fingerprint"] = "Unknown"
+			G.fields["p_stat"] = "Active"
+			G.fields["m_stat"] = "Stable"
+			G.fields["species"] = "Human"
+			data_core.general += G
+			active1 = G
+			active2 = null
+
+		else if(href_list["print_r"])
+			if(!printing)
+				printing = 1
+				playsound(loc, "sound/goonstation/machines/printer_dotmatrix.ogg", 50, 1)
+				sleep(50)
+				var/obj/item/weapon/paper/P = new /obj/item/weapon/paper(loc)
+				P.info = "<CENTER><B>Security Record</B></CENTER><BR>"
+				if(istype(active1, /datum/data/record) && data_core.general.Find(active1))
+					P.info += {"Name: [active1.fields["name"]] ID: [active1.fields["id"]]
+							<BR>\nSex: [active1.fields["sex"]]
+							<BR>\nAge: [active1.fields["age"]]
+							<BR>\nFingerprint: [active1.fields["fingerprint"]]
+							<BR>\nPhysical Status: [active1.fields["p_stat"]]
+							<BR>\nMental Status: [active1.fields["m_stat"]]<BR>"}
 				else
-					for(var/datum/data/record/E in data_core.security)
-						if((E.fields["name"] == active1.fields["name"] || E.fields["id"] == active1.fields["id"]))
-							active2 = E
-					screen = SEC_DATA_RECORD	*/
+					P.info += "<B>General Record Lost!</B><BR>"
+				if(istype(active2, /datum/data/record) && data_core.security.Find(active2))
+					P.info += {"<BR>\n<CENTER><B>Security Data</B></CENTER>
+					<BR>\nCriminal Status: [active2.fields["criminal"]]<BR>\n
+					<BR>\nMinor Crimes: [active2.fields["mi_crim"]]
+					<BR>\nDetails: [active2.fields["mi_crim_d"]]<BR>\n
+					<BR>\nMajor Crimes: [active2.fields["ma_crim"]]
+					<BR>\nDetails: [active2.fields["ma_crim_d"]]<BR>\n
+					<BR>\nImportant Notes:
+					<BR>\n\t[active2.fields["notes"]]<BR>\n<BR>\n<CENTER><B>Comments/Log</B></CENTER><BR>"}
+					for(var/c in active2.fields["comments"])
+						P.info += "[c]<BR>"
+				else
+					P.info += "<B>Security Record Lost!</B><BR>"
+				P.info += "</TT>"
+				P.name = "paper - 'Security Record'"
+				printing = null
 
-			else if(href_list["del_all"])
-				var/buttons = list()
-				buttons += list(list("name" = "Yes", "icon" = "check", "val" = "del_all2=1"))
-				buttons += list(list("name" = "No", "icon" = "times", "val" = null))
-				setTemp("Are you sure you wish to delete all records?", buttons, 1)
+		else if(href_list["print_p"])
+			if(!printing)
+				printing = 1
+				playsound(loc, "sound/goonstation/machines/printer_dotmatrix.ogg", 50, 1)
+				sleep(50)
+				if(istype(active1, /datum/data/record) && data_core.general.Find(active1))
+					create_record_photo(active1)
+				printing = null
 
-			else if(href_list["del_rg"])
-				if(active1)
-					var/buttons = list()
-					buttons += list(list("name" = "Yes", "icon" = "check", "val" = "del_rg2=1"))
-					buttons += list(list("name" = "No", "icon" = "times", "val" = null))
-					setTemp("Are you sure you wish to delete the record (ALL)?", buttons, 1)
-
-			else if(href_list["del_r"])
-				if(active1)
-					var/buttons = list()
-					buttons += list(list("name" = "Yes", "icon" = "check", "val" = "del_r2=1"))
-					buttons += list(list("name" = "No", "icon" = "times", "val" = null))
-					setTemp("Are you sure you wish to delete the record (Security Portion Only)?", buttons, 1)
-
-			else if(href_list["new_s"])
-				if(istype(active1, /datum/data/record) && !istype(active2, /datum/data/record))
-					var/datum/data/record/R = new /datum/data/record()
-					R.fields["name"] = active1.fields["name"]
-					R.fields["id"] = active1.fields["id"]
-					R.name = "Security Record #[R.fields["id"]]"
-					R.fields["criminal"] = "None"
-					R.fields["mi_crim"] = "None"
-					R.fields["mi_crim_d"] = "No minor crime convictions."
-					R.fields["ma_crim"] = "None"
-					R.fields["ma_crim_d"] = "No major crime convictions."
-					R.fields["notes"] = "No notes."
-					data_core.security += R
-					active2 = R
-					screen = SEC_DATA_RECORD
-
-			else if(href_list["new_g"])
-				var/datum/data/record/G = new /datum/data/record()
-				G.fields["name"] = "New Record"
-				G.fields["id"] = "[add_zero(num2hex(rand(1, 1.6777215E7)), 6)]"
-				G.fields["rank"] = "Unassigned"
-				G.fields["real_rank"] = "Unassigned"
-				G.fields["sex"] = "Male"
-				G.fields["age"] = "Unknown"
-				G.fields["fingerprint"] = "Unknown"
-				G.fields["p_stat"] = "Active"
-				G.fields["m_stat"] = "Stable"
-				G.fields["species"] = "Human"
-				data_core.general += G
-				active1 = G
-				active2 = null
-
-			else if(href_list["print_r"])
-				if(!printing)
-					printing = 1
-					playsound(loc, "sound/goonstation/machines/printer_dotmatrix.ogg", 50, 1)
-					sleep(50)
-					var/obj/item/weapon/paper/P = new /obj/item/weapon/paper(loc)
-					P.info = "<CENTER><B>Security Record</B></CENTER><BR>"
-					if(istype(active1, /datum/data/record) && data_core.general.Find(active1))
-						P.info += {"Name: [active1.fields["name"]] ID: [active1.fields["id"]]
-								<BR>\nSex: [active1.fields["sex"]]
-								<BR>\nAge: [active1.fields["age"]]
-								<BR>\nFingerprint: [active1.fields["fingerprint"]]
-								<BR>\nPhysical Status: [active1.fields["p_stat"]]
-								<BR>\nMental Status: [active1.fields["m_stat"]]<BR>"}
-					else
-						P.info += "<B>General Record Lost!</B><BR>"
-					if(istype(active2, /datum/data/record) && data_core.security.Find(active2))
-						P.info += {"<BR>\n<CENTER><B>Security Data</B></CENTER>
-						<BR>\nCriminal Status: [active2.fields["criminal"]]<BR>\n
-						<BR>\nMinor Crimes: [active2.fields["mi_crim"]]
-						<BR>\nDetails: [active2.fields["mi_crim_d"]]<BR>\n
-						<BR>\nMajor Crimes: [active2.fields["ma_crim"]]
-						<BR>\nDetails: [active2.fields["ma_crim_d"]]<BR>\n
-						<BR>\nImportant Notes:
-						<BR>\n\t[active2.fields["notes"]]<BR>\n<BR>\n<CENTER><B>Comments/Log</B></CENTER><BR>"}
-						for(var/c in active2.fields["comments"])
-							P.info += "[c]<BR>"
-					else
-						P.info += "<B>Security Record Lost!</B><BR>"
-					P.info += "</TT>"
-					P.name = "paper - 'Security Record'"
-					printing = null
-
-			else if(href_list["print_p"])
-				if(!printing)
-					printing = 1
-					playsound(loc, "sound/goonstation/machines/printer_dotmatrix.ogg", 50, 1)
-					sleep(50)
-					if(istype(active1, /datum/data/record) && data_core.general.Find(active1))
-						create_record_photo(active1)
-					printing = null
-
-			else if(href_list["add_c"])
-				if(!istype(active2, /datum/data/record))
-					return
+		else if(href_list["add_c"])
+			if(istype(active2, /datum/data/record))
 				var/a2 = active2
 				var/t1 = copytext(trim(sanitize(input("Add Comment:", "Secure. records", null, null) as message)), 1, MAX_MESSAGE_LEN)
-				if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-					return
+				if(!t1 || incapable || active2 != a2)
+					return 1
 				active2.fields["comments"] += "Made by [authenticated] ([rank]) on [current_date_string] [worldtime2text()]<BR>[t1]"
 
-			else if(href_list["del_c"])
-				var/index = min(max(text2num(href_list["del_c"]) + 1, 1), length(active2.fields["comments"]))
-				if(istype(active2, /datum/data/record) && active2.fields["comments"][index])
-					active2.fields["comments"] -= active2.fields["comments"][index]
+		else if(href_list["del_c"])
+			var/index = min(max(text2num(href_list["del_c"]) + 1, 1), length(active2.fields["comments"]))
+			if(istype(active2, /datum/data/record) && active2.fields["comments"][index])
+				active2.fields["comments"] -= active2.fields["comments"][index]
 
-			if(href_list["field"])
-				var/a1 = active1
-				var/a2 = active2
-				switch(href_list["field"])
-					if("name")
-						if(istype(active1, /datum/data/record))
-							var/t1 = reject_bad_name(input("Please input name:", "Secure. records", active1.fields["name"], null) as text)
-							if(!t1 || !!length(trim(t1)) || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return 1
-							active1.fields["name"] = t1
-					if("id")
-						if(istype(active2, /datum/data/record))
-							var/t1 = copytext(trim(sanitize(input("Please input id:", "Secure. records", active1.fields["id"], null) as text)), 1, MAX_MESSAGE_LEN)
-							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return 1
-							active1.fields["id"] = t1
-					if("fingerprint")
-						if(istype(active1, /datum/data/record))
-							var/t1 = copytext(trim(sanitize(input("Please input fingerprint hash:", "Secure. records", active1.fields["fingerprint"], null) as text)), 1, MAX_MESSAGE_LEN)
-							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return 1
-							active1.fields["fingerprint"] = t1
-					if("sex")
-						if(istype(active1, /datum/data/record))
-							if(active1.fields["sex"] == "Male")
-								active1.fields["sex"] = "Female"
-							else
-								active1.fields["sex"] = "Male"
-					if("age")
-						if(istype(active1, /datum/data/record))
-							var/t1 = input("Please input age:", "Secure. records", active1.fields["age"], null) as num
-							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return 1
-							active1.fields["age"] = t1
-					if("mi_crim")
-						if(istype(active2, /datum/data/record))
-							var/t1 = copytext(trim(sanitize(input("Please input minor crimes list:", "Secure. records", active2.fields["mi_crim"], null) as text)), 1, MAX_MESSAGE_LEN)
-							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return 1
-							active2.fields["mi_crim"] = t1
-					if("mi_crim_d")
-						if(istype(active2, /datum/data/record))
-							var/t1 = copytext(trim(sanitize(input("Please summarize minor crimes:", "Secure. records", active2.fields["mi_crim_d"], null) as message)), 1, MAX_MESSAGE_LEN)
-							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return 1
-							active2.fields["mi_crim_d"] = t1
-					if("ma_crim")
-						if(istype(active2, /datum/data/record))
-							var/t1 = copytext(trim(sanitize(input("Please input major crimes list:", "Secure. records", active2.fields["ma_crim"], null) as text)), 1, MAX_MESSAGE_LEN)
-							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return 1
-							active2.fields["ma_crim"] = t1
-					if("ma_crim_d")
-						if(istype(active2, /datum/data/record))
-							var/t1 = copytext(trim(sanitize(input("Please summarize major crimes:", "Secure. records", active2.fields["ma_crim_d"], null) as message)), 1, MAX_MESSAGE_LEN)
-							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return 1
-							active2.fields["ma_crim_d"] = t1
-					if("notes")
-						if(istype(active2, /datum/data/record))
-							var/t1 = copytext(html_encode(trim(input("Please summarize notes:", "Secure. records", html_decode(active2.fields["notes"]), null) as message)), 1, MAX_MESSAGE_LEN)
-							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active2 != a2)
-								return 1
-							active2.fields["notes"] = t1
-					if("criminal")
-						if(istype(active2, /datum/data/record))
-							var/buttons = list()
-							buttons += list(list("name" = "None", "icon" = "unlock", "val" = "criminal=none"))
-							buttons += list(list("name" = "*Arrest*", "icon" = "lock", "val" = "criminal=arrest"))
-							buttons += list(list("name" = "Incarcerated", "icon" = "lock", "val" = "criminal=incarcerated"))
-							buttons += list(list("name" = "Parolled", "icon" = "unlock-alt", "val" = "criminal=parolled"))
-							buttons += list(list("name" = "Released", "icon" = "unlock", "val" = "criminal=released"))
-							setTemp("<h3>Criminal Status</h3>", buttons)
-					if("rank")
-						var/list/L = list("Head of Personnel", "Captain", "AI")
-						//This was so silly before the change. Now it actually works without beating your head against the keyboard. /N
-						if(istype(active1, /datum/data/record) && L.Find(rank))
-							var/buttons = list()
-							for(var/rank in joblist)
-								buttons += list(list("name" = rank, "icon" = "briefcase", "val" = "rank=[rank]"))
-							setTemp("<h3>Rank</h3>", buttons)
+		if(href_list["field"])
+			if(incapable)
+				return 1
+			var/a1 = active1
+			var/a2 = active2
+			switch(href_list["field"])
+				if("name")
+					if(istype(active1, /datum/data/record))
+						var/t1 = reject_bad_name(input("Please input name:", "Secure. records", active1.fields["name"], null) as text)
+						if(!t1 || !length(trim(t1)) || incapable || active1 != a1)
+							return 1
+						active1.fields["name"] = t1
+				if("id")
+					if(istype(active2, /datum/data/record))
+						var/t1 = copytext(trim(sanitize(input("Please input id:", "Secure. records", active1.fields["id"], null) as text)), 1, MAX_MESSAGE_LEN)
+						if(!t1 || incapable || active1 != a1)
+							return 1
+						active1.fields["id"] = t1
+				if("fingerprint")
+					if(istype(active1, /datum/data/record))
+						var/t1 = copytext(trim(sanitize(input("Please input fingerprint hash:", "Secure. records", active1.fields["fingerprint"], null) as text)), 1, MAX_MESSAGE_LEN)
+						if(!t1 || incapable || active1 != a1)
+							return 1
+						active1.fields["fingerprint"] = t1
+				if("sex")
+					if(istype(active1, /datum/data/record))
+						if(active1.fields["sex"] == "Male")
+							active1.fields["sex"] = "Female"
 						else
-							alert(usr, "<span class='warning'>You do not have the required rank to do this!</span>")
-					if("species")
-						if(istype(active1, /datum/data/record))
-							var/t1 = copytext(trim(sanitize(input("Please enter race:", "General records", active1.fields["species"], null) as message)), 1, MAX_MESSAGE_LEN)
-							if(!t1 || !authenticated || usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)) || active1 != a1)
-								return
-							active1.fields["species"] = t1
+							active1.fields["sex"] = "Male"
+				if("age")
+					if(istype(active1, /datum/data/record))
+						var/t1 = input("Please input age:", "Secure. records", active1.fields["age"], null) as num
+						if(!t1 || incapable || active1 != a1)
+							return 1
+						active1.fields["age"] = t1
+				if("mi_crim")
+					if(istype(active2, /datum/data/record))
+						var/t1 = copytext(trim(sanitize(input("Please input minor crimes list:", "Secure. records", active2.fields["mi_crim"], null) as text)), 1, MAX_MESSAGE_LEN)
+						if(!t1 || incapable || active2 != a2)
+							return 1
+						active2.fields["mi_crim"] = t1
+				if("mi_crim_d")
+					if(istype(active2, /datum/data/record))
+						var/t1 = copytext(trim(sanitize(input("Please summarize minor crimes:", "Secure. records", active2.fields["mi_crim_d"], null) as message)), 1, MAX_MESSAGE_LEN)
+						if(!t1 || incapable || active2 != a2)
+							return 1
+						active2.fields["mi_crim_d"] = t1
+				if("ma_crim")
+					if(istype(active2, /datum/data/record))
+						var/t1 = copytext(trim(sanitize(input("Please input major crimes list:", "Secure. records", active2.fields["ma_crim"], null) as text)), 1, MAX_MESSAGE_LEN)
+						if(!t1 || incapable || active2 != a2)
+							return 1
+						active2.fields["ma_crim"] = t1
+				if("ma_crim_d")
+					if(istype(active2, /datum/data/record))
+						var/t1 = copytext(trim(sanitize(input("Please summarize major crimes:", "Secure. records", active2.fields["ma_crim_d"], null) as message)), 1, MAX_MESSAGE_LEN)
+						if(!t1 || incapable || active2 != a2)
+							return 1
+						active2.fields["ma_crim_d"] = t1
+				if("notes")
+					if(istype(active2, /datum/data/record))
+						var/t1 = copytext(html_encode(trim(input("Please summarize notes:", "Secure. records", html_decode(active2.fields["notes"]), null) as message)), 1, MAX_MESSAGE_LEN)
+						if(!t1 || incapable || active2 != a2)
+							return 1
+						active2.fields["notes"] = t1
+				if("criminal")
+					if(istype(active2, /datum/data/record))
+						var/list/buttons = list()
+						buttons[++buttons.len] = list("name" = "None", "icon" = "unlock", "val" = "criminal=none", "status" = (active2.fields["criminal"] == "None" ? "selected" : null))
+						buttons[++buttons.len] = list("name" = "*Arrest*", "icon" = "lock", "val" = "criminal=arrest", "status" = (active2.fields["criminal"] == "*Arrest*" ? "selected" : null))
+						buttons[++buttons.len] = list("name" = "Incarcerated", "icon" = "lock", "val" = "criminal=incarcerated", "status" = (active2.fields["criminal"] == "Incarcerated" ? "selected" : null))
+						buttons[++buttons.len] = list("name" = "Parolled", "icon" = "unlock-alt", "val" = "criminal=parolled", "status" = (active2.fields["criminal"] == "Parolled" ? "selected" : null))
+						buttons[++buttons.len] = list("name" = "Released", "icon" = "unlock", "val" = "criminal=released", "status" = (active2.fields["criminal"] == "Released" ? "selected" : null))
+						setTemp("<h3>Criminal Status</h3>", buttons)
+				if("rank")
+					var/list/L = list("Head of Personnel", "Captain", "AI")
+					//This was so silly before the change. Now it actually works without beating your head against the keyboard. /N
+					if(istype(active1, /datum/data/record) && L.Find(rank))
+						var/list/buttons = list()
+						for(var/rank in joblist)
+							buttons[++buttons.len] = list("name" = rank, "icon" = null, "val" = "rank=[rank]", "status" = (active1.fields["rank"] == rank ? "selected" : null))
+						setTemp("<h3>Rank</h3>", buttons)
+					else
+						setTemp("<span class='bad'>You do not have the required rank to do this!</span>")
+				if("species")
+					if(istype(active1, /datum/data/record))
+						var/t1 = copytext(trim(sanitize(input("Please enter race:", "General records", active1.fields["species"], null) as message)), 1, MAX_MESSAGE_LEN)
+						if(!t1 || incapable || active1 != a1)
+							return 1
+						active1.fields["species"] = t1
 
 	add_fingerprint(usr)
-	nanomanager.update_uis(src)
-	return
+	return 1
 
-/obj/machinery/computer/secure_data/proc/setTemp(text, list/buttons = list(), notice = 0)
-	temp = list("text" = text, "buttons" = buttons, "has_buttons" = buttons.len > 0, "notice" = notice)
+/obj/machinery/computer/secure_data/proc/setTemp(text, list/buttons = list())
+	temp = list("text" = text, "buttons" = buttons, "has_buttons" = buttons.len > 0)
 
 /obj/machinery/computer/secure_data/proc/create_record_photo(datum/data/record/R)
 	// basically copy-pasted from the camera code but different enough that it has to be redone
