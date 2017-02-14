@@ -1,10 +1,9 @@
-/var/list/all_lighting_overlays = list() // Global list of lighting overlays.
+var/list/all_lighting_overlays = list() // Global list of lighting overlays.
 /atom/movable/lighting_overlay
 	name = ""
 	mouse_opacity = 0
 	simulated = 0
 	anchored = 1
-	flags = NOREACT
 	icon = LIGHTING_ICON
 	layer = LIGHTING_LAYER
 	invisibility = INVISIBILITY_LIGHTING
@@ -18,7 +17,6 @@
 	var/lum_b = 0
 
 	var/needs_update = FALSE
-	var/wa = FALSE
 
 /atom/movable/lighting_overlay/New(var/atom/loc, var/no_update = FALSE)
 	. = ..()
@@ -33,68 +31,51 @@
 	update_overlay()
 
 /atom/movable/lighting_overlay/proc/update_overlay()
+	set waitfor = FALSE
 	var/turf/T = loc
-	if(!istype(T)) // Erm...
+
+	if(!istype(T))
 		if(loc)
-			warning("A lighting overlay realised its loc was NOT a turf (actual loc: [loc], [loc.type]) in update_overlay() and got pooled!")
+			log_debug("A lighting overlay realised its loc was NOT a turf (actual loc: [loc][loc ? ", " + loc.type : "null"]) in update_overlay() and got qdel'ed!")
 		else
-			warning("A lighting overlay realised it was in nullspace in update_overlay() and got pooled!")
+			log_debug("A lighting overlay realised it was in nullspace in update_overlay() and got pooled!")
 		qdel(src)
-	var/list/L = src.color:Copy() // For some dumb reason BYOND won't allow me to use [] on a colour matrix directly.
-	var/max    = 0
+		return
 
-	for(var/datum/lighting_corner/C in T.corners)
-		var/i = 0
+	// To the future coder who sees this and thinks
+	// "Why didn't he just use a loop?"
+	// Well my man, it's because the loop performed like shit.
+	// And there's no way to improve it because
+	// without a loop you can make the list all at once which is the fastest you're gonna get.
+	// Oh it's also shorter line wise.
+	// Including with these comments.
 
-		// Huge switch to determine i based on D.
-		switch(turn(C.masters[T], 180))
-			if(NORTHEAST)
-				i = CL_MATRIX_AR
+	// See LIGHTING_CORNER_DIAGONAL in lighting_corner.dm for why these values are what they are.
+	// No I seriously cannot think of a more efficient method, fuck off Comic.
+	var/datum/lighting_corner/cr = T.corners[3] || dummy_lighting_corner
+	var/datum/lighting_corner/cg = T.corners[2] || dummy_lighting_corner
+	var/datum/lighting_corner/cb = T.corners[4] || dummy_lighting_corner
+	var/datum/lighting_corner/ca = T.corners[1] || dummy_lighting_corner
 
-			if(SOUTHEAST)
-				i = CL_MATRIX_GR
+	var/max = max(cr.cache_mx, cg.cache_mx, cb.cache_mx, ca.cache_mx)
 
-			if(SOUTHWEST)
-				i = CL_MATRIX_RR
+	var/list/new_matrix = list(
+		cr.cache_r, cr.cache_g, cr.cache_b, 0,
+		cg.cache_r, cg.cache_g, cg.cache_b, 0,
+		cb.cache_r, cb.cache_g, cb.cache_b, 0,
+		ca.cache_r, ca.cache_g, ca.cache_b, 0,
+		0, 0, 0, 1
+	)
+	var/lum = max > LIGHTING_SOFT_THRESHOLD
 
-			if(NORTHWEST)
-				i = CL_MATRIX_BR
-
-		var/mx = max(C.lum_r, C.lum_g, C.lum_b) // Scale it so 1 is the strongest lum, if it is above 1.
-		. = 1 // factor
-		if(mx > 1)
-			. = 1 / mx
-
-		else if(mx < LIGHTING_SOFT_THRESHOLD)
-			. = 0 // 0 means soft lighting.
-
-		if(wa)
-			to_chat(world, "[.] [mx] [max] ")
-
-		max = max(max, mx)
-
-		if(.)
-			L[i + 0]   = C.lum_r * .
-			L[i + 1]   = C.lum_g * .
-			L[i + 2]   = C.lum_b * .
-		else
-			L[i + 0]   = LIGHTING_SOFT_THRESHOLD
-			L[i + 1]   = LIGHTING_SOFT_THRESHOLD
-			L[i + 2]   = LIGHTING_SOFT_THRESHOLD
-
-	src.color  = L
-	luminosity = (max > LIGHTING_SOFT_THRESHOLD)
-
-	// Variety of overrides so the overlays don't get affected by weird things.
-
-/atom/movable/lighting_overlay/proc/get_clamped_lum(var/minlum = 0, var/maxlum = 1)
-	var/lum = max(lum_r, lum_g, lum_b)
-	if(lum <= minlum)
-		return 0
-	else if(lum >= maxlum)
-		return 1
+	if(lum)
+		luminosity = 1
+		animate(src, color = new_matrix, time = 5)
 	else
-		return (lum - minlum) / (maxlum - minlum)
+		animate(src, color = new_matrix, time = 5)
+		animate(luminosity = 0, time = 0)
+
+
 
 /atom/movable/lighting_overlay/singularity_act()
 	return
@@ -103,9 +84,13 @@
 	return
 
 /atom/movable/lighting_overlay/Destroy()
-	global.all_lighting_overlays -= src
+	global.all_lighting_overlays        -= src
+	global.lighting_update_overlays     -= src
+	global.lighting_update_overlays_old -= src
+
 	var/turf/T = loc
 	if(istype(T))
 		T.lighting_overlay = null
 		T.luminosity = 1
+
 	return ..()

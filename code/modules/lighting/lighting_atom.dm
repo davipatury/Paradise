@@ -6,18 +6,24 @@
 	var/datum/light_source/light
 	var/list/light_sources
 
-/atom/proc/set_light(l_range, l_power, l_color)
-	if(l_power != null) light_power = l_power
-	if(l_range != null) light_range = l_range
-	if(l_color != null) light_color = l_color
+// Nonsensical value for l_color default, so we can detect if it gets set to null.
+#define NONSENSICAL_VALUE -99999
+/atom/proc/set_light(l_range, l_power, l_color = NONSENSICAL_VALUE)
+	if(l_power != null)
+		light_power = l_power
+
+	if(l_range != null)
+		light_range = l_range
+
+	if(l_color != NONSENSICAL_VALUE)
+		light_color = l_color
 
 	update_light()
 
+#undef NONSENSICAL_VALUE
+
 /atom/proc/update_light()
 	set waitfor = FALSE
-
-	if(!lighting_corners_initialised)
-		sleep(20)
 
 	if(!light_power || !light_range)
 		if(light)
@@ -36,24 +42,25 @@
 
 /atom/New()
 	. = ..()
+
 	if(light_power && light_range)
 		update_light()
+
+	if(opacity && isturf(loc))
+		var/turf/T = loc
+		T.has_opaque_atom = TRUE // No need to recalculate it in this case, it's guranteed to be on afterwards anyways.
 
 /atom/Destroy()
 	if(light)
 		light.destroy()
 		light = null
-	if(opacity && isturf(loc))
-		var/turf/T = loc
-		T.has_opaque_atom = TRUE // No need to recalculate it in this case, it's guaranteed to be on afterwards anyways.
-
-	. = ..()
+	return ..()
 
 /atom/movable/Destroy()
 	var/turf/T = loc
 	if(opacity && istype(T))
 		T.reconsider_lights()
-	. = ..()
+	return ..()
 
 /atom/movable/Move()
 	var/turf/old_loc = loc
@@ -71,11 +78,22 @@
 		new_loc.reconsider_lights()
 
 /atom/proc/set_opacity(new_opacity)
-	var/old_opacity = opacity
+	if(new_opacity == opacity)
+		return
+
 	opacity = new_opacity
 	var/turf/T = loc
-	if(old_opacity != new_opacity && istype(T))
+	if(!isturf(T))
+		return
+
+	if(new_opacity == TRUE)
+		T.has_opaque_atom = TRUE
 		T.reconsider_lights()
+	else
+		var/old_has_opaque_atom = T.has_opaque_atom
+		T.recalc_atom_opacity()
+		if(old_has_opaque_atom != T.has_opaque_atom)
+			T.reconsider_lights()
 
 /obj/item/equipped()
 	. = ..()

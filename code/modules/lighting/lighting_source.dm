@@ -1,11 +1,14 @@
-/datum/light_source
-	var/atom/top_atom       // The atom we're emitting light from (for example a mob if we're from a flashlight that's being held).
-	var/atom/source_atom    // The atom that we belong to.
+// This is where the fun begins.
+// These are the main datums that emit light.
 
-	var/turf/source_turf    // The turf under the above.
-	var/light_power         // Intensity of the emitter light.
-	var/light_range         // The range of the emitted light.
-	var/light_color         // The colour of the light, string, decomposed by parse_light_color()
+/datum/light_source
+	var/atom/top_atom        // The atom we're emitting light from(for example a mob if we're from a flashlight that's being held).
+	var/atom/source_atom     // The atom that we belong to.
+
+	var/turf/source_turf     // The turf under the above.
+	var/light_power    // Intensity of the emitter light.
+	var/light_range      // The range of the emitted light.
+	var/light_color    // The colour of the light, string, decomposed by parse_light_color()
 
 	// Variables for keeping track of the colour.
 	var/lum_r
@@ -20,11 +23,11 @@
 	var/list/datum/lighting_corner/effect_str     // List used to store how much we're affecting corners.
 	var/list/turf/affecting_turfs
 
-	var/applied             // Whether we have applied our light yet or not.
+	var/applied = FALSE // Whether we have applied our light yet or not.
 
-	var/vis_update          // Whether we should smartly recalculate visibility. and then only update tiles that became (in)visible to us.
-	var/needs_update        // Whether we are queued for an update.
-	var/destroyed           // Whether we are destroyed and need to stop emitting light.
+	var/vis_update      // Whether we should smartly recalculate visibility. and then only update tiles that became(in)visible to us.
+	var/needs_update    // Whether we are queued for an update.
+	var/destroyed       // Whether we are destroyed and need to stop emitting light.
 	var/force_update
 
 /datum/light_source/New(var/atom/owner, var/atom/top)
@@ -64,31 +67,15 @@
 	if(top_atom)
 		top_atom.light_sources    -= src
 
-#ifdef LIGHTING_INSTANT_UPDATES
-/datum/light_source/proc/effect_update()
-	if(check() || destroyed || force_update)
-		remove_lum()
-		if(!destroyed)
-			apply_lum()
-
-	else if(vis_update)	// We smartly update only tiles that became (in) visible to use.
-		smart_vis_update()
-
-	vis_update   = FALSE
-	force_update = FALSE
-	needs_update = FALSE
-#else
-
 // Call it dirty, I don't care.
 // This is here so there's no performance loss on non-instant updates from the fact that the engine can also do instant updates.
-// If you're wondering what's with the "BYOND" argument: BYOND won't let me have a () macro that has no arguments :|.
+// If you're wondering what's with the "BYOND" argument: BYOND won't let me have a() macro that has no arguments :|.
 #define effect_update(BYOND)            \
 	if(!needs_update)                  \
 	{                                   \
 		lighting_update_lights += src;  \
 		needs_update            = TRUE; \
 	}
-#endif
 
 // This proc will cause the light source to update the top atom, and add itself to the update queue.
 /datum/light_source/proc/update(var/atom/new_top_atom)
@@ -129,7 +116,7 @@
 		top_atom = source_atom
 		. = 1
 
-	if(istype(top_atom, /turf))
+	if(isturf(top_atom))
 		if(source_turf != top_atom)
 			source_turf = top_atom
 			. = 1
@@ -153,21 +140,12 @@
 		parse_light_color()
 		. = 1
 
-/datum/light_source/proc/get_clamped_lum(var/minlum = 0, var/maxlum = 1)
-	var/lum = max(lum_r, lum_g, lum_b)
-	if(lum <= minlum)
-		return 0
-	else if(lum >= maxlum)
-		return 1
-	else
-		return (lum - minlum) / (maxlum - minlum)
-
 // Decompile the hexadecimal colour into lumcounts of each perspective.
 /datum/light_source/proc/parse_light_color()
 	if(light_color)
-		lum_r = color2R(light_color) / 255
-		lum_g = color2G(light_color) / 255
-		lum_b = color2B(light_color) / 255
+		lum_r = GetRedPart  (light_color) / 255
+		lum_g = GetGreenPart(light_color) / 255
+		lum_b = GetBluePart (light_color) / 255
 	else
 		lum_r = 1
 		lum_g = 1
@@ -204,9 +182,10 @@
 	);
 
 // This is the define used to calculate falloff.
-#define LUM_FALLOFF(C, T) (1 - CLAMP01(sqrt((C.x - T.x) ** 2 + (C.y - T.y) ** 2 + LIGHTING_HEIGHT) / max(1, light_range)))
+#define LUM_FALLOFF(C, T)(1 - CLAMP01(sqrt((C.x - T.x) ** 2 +(C.y - T.y) ** 2 + LIGHTING_HEIGHT) / max(1, light_range)))
 
 /datum/light_source/proc/apply_lum()
+	var/static/update_gen = 1
 	applied = 1
 
 	// Keep track of the last applied lum values so that the lighting can be reversed
@@ -215,13 +194,18 @@
 	applied_lum_b = lum_b
 
 	FOR_DVIEW(var/turf/T, light_range, source_turf, INVISIBILITY_LIGHTING)
+		if(!T.lighting_corners_initialised)
+			T.generate_missing_corners()
+
 		for(var/datum/lighting_corner/C in T.get_corners())
-			if(effect_str.Find(C))
+			if(C.update_gen == update_gen)
 				continue
 
+			C.update_gen = update_gen
 			C.affecting += src
 
 			if(!C.active)
+				effect_str[C] = 0
 				continue
 
 			APPLY_CORNER(C)
@@ -231,6 +215,8 @@
 
 		T.affecting_lights += src
 		affecting_turfs    += T
+
+	update_gen++
 
 /datum/light_source/proc/remove_lum()
 	applied = FALSE
@@ -260,6 +246,8 @@
 	var/list/datum/lighting_corner/corners = list()
 	var/list/turf/turfs                    = list()
 	FOR_DVIEW(var/turf/T, light_range, source_turf, 0)
+		if(!T.lighting_corners_initialised)
+			T.generate_missing_corners()
 		corners |= T.get_corners()
 		turfs   += T
 
@@ -279,6 +267,7 @@
 	for(var/datum/lighting_corner/C in corners - effect_str) // New corners
 		C.affecting += src
 		if(!C.active)
+			effect_str[C] = 0
 			continue
 
 		APPLY_CORNER(C)

@@ -103,8 +103,6 @@
 	var/bones_can_break = 1
 	var/limbs_can_break = 1
 
-	var/no_click_cooldown = 0
-
 	var/revival_pod_plants = 1
 	var/revival_cloning = 1
 	var/revival_brain_life = -1
@@ -577,6 +575,12 @@
 
 				if("round_abandon_penalty_period")
 					config.round_abandon_penalty_period = MinutesToTicks(text2num(value))
+					
+				if("medal_hub_address")
+					global.medal_hub = value
+					
+				if("medal_hub_password")
+					global.medal_pass = value
 
 				if("disable_ooc_emoji")
 					config.disable_ooc_emoji = 1

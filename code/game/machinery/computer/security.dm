@@ -207,7 +207,7 @@
 		if(authenticated)
 			active1 = null
 			active2 = null
-			screen = MED_DATA_MAIN
+			screen = SEC_DATA_R_LIST
 
 	if(authenticated)
 		var/incapable = (usr.stat || usr.restrained() || (!in_range(src, usr) && !issilicon(usr)))

@@ -16,11 +16,6 @@
 	needs_permit = 1
 	attack_verb = list("struck", "hit", "bashed")
 
-	var/burst = 1
-	var/burst_delay = 2
-	var/next_fire_time = 0
-	var/move_delay = 1
-
 	var/fire_sound = "gunshot"
 	var/fire_sound_text = "gunshot" //the fire sound that shows in chat messages: laser blast, gunshot, etc.
 	var/suppressed = 0					//whether or not a message is displayed when fired
@@ -50,7 +45,7 @@
 	lefthand_file = 'icons/mob/inhands/guns_lefthand.dmi'
 	righthand_file = 'icons/mob/inhands/guns_righthand.dmi'
 
-	var/obj/item/device/flashlight/F = null
+	var/obj/item/device/flashlight/gun_light = null
 	var/can_flashlight = 0
 
 	var/list/upgrades = list()
@@ -68,7 +63,7 @@
 
 /obj/item/weapon/gun/New()
 	..()
-	if(F)
+	if(gun_light)
 		verbs += /obj/item/weapon/gun/proc/toggle_gunlight
 	build_zooming()
 
@@ -87,12 +82,9 @@
 /obj/item/weapon/gun/proc/can_shoot()
 	return 1
 
-/obj/item/weapon/gun/proc/shoot_with_empty_chamber(mob/living/user)
-	if(user)
-		user.visible_message("*click click*", "<span class='danger'>*click*</span>")
-	else
-		visible_message("*click click*")
-	playsound(src.loc, 'sound/weapons/empty.ogg', 100, 1)
+/obj/item/weapon/gun/proc/shoot_with_empty_chamber(mob/living/user as mob|obj)
+	to_chat(user, "<span class='danger'>*click*</span>")
+	playsound(user, 'sound/weapons/empty.ogg', 100, 1)
 
 /obj/item/weapon/gun/proc/shoot_live_shot(mob/living/user as mob|obj, pointblank = 0, mob/pbtarget = null, message = 1)
 	if(recoil)
@@ -157,10 +149,6 @@
 
 	if(weapon_weight == WEAPON_HEAVY && user.get_inactive_hand())
 		to_chat(user, "<span class='userdanger'>You need both hands free to fire \the [src]!</span>")
-		return
-
-	if(user && user.client && user.aiming && user.aiming.active && user.aiming.aiming_at != target)
-		PreFire(target, user, params) //They're using the new gun system, locate what they're aiming at.
 		return
 
 	process_fire(target,user,1,params)
@@ -253,27 +241,27 @@ obj/item/weapon/gun/proc/newshot()
 	if(istype(I, /obj/item/device/flashlight/seclite))
 		var/obj/item/device/flashlight/seclite/S = I
 		if(can_flashlight)
-			if(!F)
+			if(!gun_light)
 				if(!user.unEquip(I))
 					return
 				to_chat(user, "<span class='notice'>You click [S] into place on [src].</span>")
 				if(S.on)
 					set_light(0)
-				F = S
+				gun_light = S
 				I.loc = src
 				update_icon()
-				update_gunlight(user)
+				update_gun_light(user)
 				var/datum/action/A = new /datum/action/item_action/toggle_gunlight(src)
 				if(loc == user)
 					A.Grant(user)
 
 	if(istype(I, /obj/item/weapon/screwdriver))
-		if(F && can_flashlight)
+		if(gun_light && can_flashlight)
 			for(var/obj/item/device/flashlight/seclite/S in src)
 				to_chat(user, "<span class='notice'>You unscrew the seclite from [src].</span>")
-				F = null
+				gun_light = null
 				S.loc = get_turf(user)
-				update_gunlight(user)
+				update_gun_light(user)
 				S.update_brightness(user)
 				update_icon()
 				for(var/datum/action/item_action/toggle_gunlight/TGL in actions)
@@ -285,26 +273,26 @@ obj/item/weapon/gun/proc/newshot()
 	..()
 
 /obj/item/weapon/gun/proc/toggle_gunlight()
-	set name = "Toggle Gunlight"
+	set name = "Toggle Gun Light"
 	set category = "Object"
 	set desc = "Click to toggle your weapon's attached flashlight."
 
-	if(!F)
+	if(!gun_light)
 		return
 
 	var/mob/living/carbon/human/user = usr
 	if(!isturf(user.loc))
 		to_chat(user, "<span class='warning'>You cannot turn the light on while in this [user.loc]!</span>")
-	F.on = !F.on
-	to_chat(user, "<span class='notice'>You toggle the gunlight [F.on ? "on":"off"].</span>")
+	gun_light.on = !gun_light.on
+	to_chat(user, "<span class='notice'>You toggle the gun light [gun_light.on ? "on":"off"].</span>")
 
 	playsound(user, 'sound/weapons/empty.ogg', 100, 1)
-	update_gunlight(user)
+	update_gun_light(user)
 
-/obj/item/weapon/gun/proc/update_gunlight(mob/user = null)
-	if(F)
-		if(F.on)
-			set_light(F.brightness_on)
+/obj/item/weapon/gun/proc/update_gun_light(mob/user = null)
+	if(gun_light)
+		if(gun_light.on)
+			set_light(gun_light.brightness_on)
 		else
 			set_light(0)
 		update_icon()

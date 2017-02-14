@@ -15,9 +15,6 @@
 			return 1
 	return (!mover.density || !density || lying)
 
-/mob/proc/setMoveCooldown(var/timeout)
-	if(client)
-		client.move_delay = max(world.time + timeout, client.move_delay)
 
 /client/North()
 	..()
@@ -279,7 +276,7 @@
 
 		for(var/obj/item/weapon/grab/G in mob)
 			if(G.state == GRAB_NECK)
-				mob.set_dir(reverse_dir[direct])
+				mob.setDir(reverse_dir[direct])
 			G.adjust_position()
 		for(var/obj/item/weapon/grab/G in mob.grabbed_by)
 			G.adjust_position()
