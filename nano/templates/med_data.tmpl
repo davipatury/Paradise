@@ -56,12 +56,8 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 					<td valign='top' style='margin-right: 300px;'>
 						{{for data.general.fields}}
 							<div class="item">
-								<div class="itemLabel">
-									{{:value.field}}
-								</div>
-								<div class="itemContent">
-									{{:helper.link(value.value, value.name ? 'pencil' : 'user-times', {'field' : value.name}, value.name ? null : 'disabled')}}
-								</div>
+								<div class="itemLabel">{{:value.field}}</div>
+								<div class="itemContent">{{:helper.link(value.value, value.name ? 'pencil' : 'user-times', {'field' : value.name}, value.name ? null : 'disabled')}}</div>
 							</div>
 						{{/for}}
 					</td>
@@ -88,12 +84,8 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 		{{else}}
 			{{for data.medical.fields}}
 				<div class="item">
-					<div class="itemLabel">
-						{{:value.field}}
-					</div>
-					<div class="itemContent">
-						{{:helper.link(value.value, 'pencil', {'field' : value.name})}}
-					</div>
+					<div class="itemLabel">{{:value.field}}</div>
+					<div class="itemContent">{{:helper.link(value.value, 'pencil', {'field' : value.name})}}</div>
 				</div>
 				{{if value.line_break}}
 					<br>
@@ -129,12 +121,8 @@ Used In File(s): \code\game\machinery\computer\medical.dm
 		{{for data.medbots}}
 			<h4>{{:value.name}}</h4>
 			<div class="item">
-				<div class="itemLabel">
-					Location:
-				</div>
-				<div class="itemContent">
-					{{:value.x}}, {{:value.y}}
-				</div>
+				<div class="itemLabel">Location:</div>
+				<div class="itemContent">{{:value.x}}, {{:value.y}}</div>
 			</div>
 			<div class="item">
 				<div class="itemLabel">

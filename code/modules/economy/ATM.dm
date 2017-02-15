@@ -66,7 +66,7 @@ log transactions
 		if(istype(T) && locate(/obj/item/weapon/spacecash) in T)
 			var/list/cash_found = list()
 			for(var/obj/item/weapon/spacecash/S in T)
-				cash_found+=S
+				cash_found += S
 			if(cash_found.len>0)
 				if(prob(50))
 					playsound(loc, 'sound/items/polaroid1.ogg', 50, 1)
@@ -75,7 +75,7 @@ log transactions
 				var/amount = count_cash(cash_found)
 				for(var/obj/item/weapon/spacecash/S in cash_found)
 					qdel(S)
-				authenticated_account.charge(-amount,null,"Credit deposit",terminal_id=machine_id,dest_name = "Terminal")
+				authenticated_account.charge(-amount, null, "Credit deposit", terminal_id=machine_id, dest_name = "Terminal")
 
 /obj/machinery/atm/proc/reconnect_database()
 	for(var/obj/machinery/computer/account_database/DB in world) //Hotfix until someone finds out why it isn't in 'machines'
@@ -83,17 +83,16 @@ log transactions
 			linked_db = DB
 			break
 
-/obj/machinery/atm/attackby(obj/item/I as obj, mob/user as mob, params)
+/obj/machinery/atm/attackby(obj/item/I, mob/user, params)
 	if(istype(I, /obj/item/weapon/card))
-		var/obj/item/weapon/card/id/idcard = I
 		if(!held_card)
-			usr.drop_item()
-			idcard.loc = src
-			held_card = idcard
+			user.drop_item()
+			I.forceMove(src)
+			held_card = I
 			if(authenticated_account && held_card.associated_account_number != authenticated_account.account_number)
 				authenticated_account = null
 	else if(authenticated_account)
-		if(istype(I,/obj/item/weapon/spacecash))
+		if(istype(I, /obj/item/weapon/spacecash))
 			//consume the money
 			var/obj/item/weapon/spacecash/C = I
 			authenticated_account.money += C.get_total()
@@ -118,11 +117,11 @@ log transactions
 	else
 		..()
 
-/obj/machinery/atm/attack_hand(mob/user as mob)
+/obj/machinery/atm/attack_hand(mob/user)
 	if(issilicon(user))
 		to_chat(user, "<span class='warning'>Artificial unit recognized. Artificial units do not currently receive monetary compensation, as per Nanotrasen regulation #1005.</span>")
 		return
-	if(get_dist(src,user) <= 1)
+	if(get_dist(src, user) <= 1)
 		add_fingerprint(user)
 		ui_interact(user)
 
@@ -162,7 +161,7 @@ log transactions
 
 	return data
 
-/obj/machinery/atm/Topic(var/href, var/href_list)
+/obj/machinery/atm/Topic(href, list/href_list)
 	if(href_list["choice"])
 		switch(href_list["choice"])
 			if("transfer")
@@ -297,7 +296,7 @@ log transactions
 					var/image/stampoverlay = image('icons/obj/bureaucracy.dmi')
 					stampoverlay.icon_state = "paper_stamp-cent"
 					if(!R.stamped)
-						R.stamped = new
+						R.stamped = new()
 					R.stamped += /obj/item/weapon/stamp
 					R.overlays += stampoverlay
 					R.stamps += "<HR><i>This paper has been stamped by the Automatic Teller Machine.</i>"
@@ -323,26 +322,26 @@ log transactions
 						held_card = I
 			if("logout")
 				authenticated_account = null
-	nanomanager.update_uis(src)
+	return 1
 
 //create the most effective combination of notes to make up the requested amount
-/obj/machinery/atm/proc/withdraw_arbitrary_sum(var/arbitrary_sum)
-	dispense_cash(arbitrary_sum,get_step(get_turf(src),turn(dir,180))) // Spawn on the ATM.
+/obj/machinery/atm/proc/withdraw_arbitrary_sum(arbitrary_sum)
+	dispense_cash(arbitrary_sum, get_step(get_turf(src), turn(dir, 180))) // Spawn on the ATM.
 
 //stolen wholesale and then edited a bit from newscasters, which are awesome and by Agouri
-/obj/machinery/atm/proc/scan_user(mob/living/carbon/human/human_user as mob)
+/obj/machinery/atm/proc/scan_user(mob/living/carbon/human/H)
 	if(!authenticated_account && linked_db)
-		if(human_user.wear_id)
+		if(H.wear_id)
 			var/obj/item/weapon/card/id/I
-			if(istype(human_user.wear_id, /obj/item/weapon/card/id) )
-				I = human_user.wear_id
-			else if(istype(human_user.wear_id, /obj/item/device/pda) )
-				var/obj/item/device/pda/P = human_user.wear_id
+			if(istype(H.wear_id, /obj/item/weapon/card/id) )
+				I = H.wear_id
+			else if(istype(H.wear_id, /obj/item/device/pda) )
+				var/obj/item/device/pda/P = H.wear_id
 				I = P.id
 			if(I)
 				authenticated_account = attempt_account_access(I.associated_account_number)
 				if(authenticated_account)
-					to_chat(human_user, "[bicon(src)]<span class='notice'>Access granted. Welcome user '[authenticated_account.owner_name].'</span>")
+					to_chat(H, "[bicon(src)]<span class='notice'>Access granted. Welcome user '[authenticated_account.owner_name].'</span>")
 
 					//create a transaction log entry
 					var/datum/transaction/T = new()

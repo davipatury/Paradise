@@ -70,19 +70,18 @@
 			reconnect_database()
 		if(linked_db)
 			if(linked_account)
-				var/obj/item/weapon/card/I = O
-				scan_card(I)
+				scan_card(O, user)
 			else
-				to_chat(usr, "[bicon(src)]<span class='warning'>Unable to connect to linked account.</span>")
+				to_chat(user, "[bicon(src)]<span class='warning'>Unable to connect to linked account.</span>")
 		else
-			to_chat(usr, "[bicon(src)]<span class='warning'>Unable to connect to accounts database.</span>")
+			to_chat(user, "[bicon(src)]<span class='warning'>Unable to connect to accounts database.</span>")
 	else
 		..()
 
 /obj/item/device/eftpos/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
 	ui = nanomanager.try_update_ui(user, src, ui_key, ui, force_open)
 	if(!ui)
-		ui = new(user, src, ui_key, "EFTPOS.tmpl", "EFTPOS UI", 790, 260)
+		ui = new(user, src, ui_key, "EFTPOS.tmpl", "EFTPOS UI", 790, 300)
 		ui.open()
 
 /obj/item/device/eftpos/ui_data(mob/user, ui_key = "main", datum/topic_state/state = default_state)
@@ -116,7 +115,7 @@
 			if("change_id")
 				var/attempt_code = text2num(input("Re-enter the current EFTPOS access code", "Confirm EFTPOS code"))
 				if(attempt_code == access_code)
-					var name = input("Enter a new terminal ID for this device", "Enter new EFTPOS ID") as text|null
+					var/name = input("Enter a new terminal ID for this device", "Enter new EFTPOS ID") as text|null
 					if(name)
 						eftpos_name = name + " EFTPOS scanner"
 						print_reference()
@@ -132,12 +131,12 @@
 				else
 					to_chat(usr, "[bicon(src)]<span class='warning'>Unable to connect to accounts database.</span>")
 			if("trans_purpose")
-				var/purpose = input("Enter reason for EFTPOS transaction", "Transaction purpose") as text|null
+				var/purpose = input("Enter reason for EFTPOS transaction", "Transaction purpose", transaction_purpose) as text|null
 				if(purpose)
 					transaction_purpose = purpose
 			if("trans_value")
-				var/try_num = input("Enter amount for EFTPOS transaction", "Transaction amount") as num
-				if(try_num < 0)
+				var/try_num = input("Enter amount for EFTPOS transaction", "Transaction amount", transaction_amount) as num|null
+				if(!try_num || try_num < 0)
 					alert("That is not a valid amount!")
 				else
 					transaction_amount = try_num
@@ -158,7 +157,7 @@
 				if(linked_db && linked_account)
 					var/obj/item/I = usr.get_active_hand()
 					if(istype(I, /obj/item/weapon/card))
-						scan_card(I)
+						scan_card(I, usr)
 				else
 					to_chat(usr, "[bicon(src)]<span class='warning'>Unable to link accounts.</span>")
 			if("reset")
@@ -173,12 +172,12 @@
 					access_code = 0
 					to_chat(usr, "[bicon(src)]<span class='info'>Access code reset to 0.</span>")
 
-	nanomanager.update_uis(src)
+	return 1
 
-/obj/item/device/eftpos/proc/scan_card(var/obj/item/weapon/card/I)
+/obj/item/device/eftpos/proc/scan_card(obj/item/weapon/card/I, mob/user)
 	if(istype(I, /obj/item/weapon/card/id))
 		var/obj/item/weapon/card/id/C = I
-		visible_message("<span class='info'>[usr] swipes a card through [src].</span>")
+		visible_message("<span class='info'>[user] swipes a card through [src].</span>")
 		if(transaction_locked && !transaction_paid)
 			if(linked_account)
 				var/attempt_pin = input("Enter pin code", "EFTPOS transaction") as num
@@ -215,12 +214,10 @@
 						T.time = worldtime2text()
 						linked_account.transaction_log.Add(T)
 					else
-						to_chat(usr, "[bicon(src)]<span class='warning'>You don't have that much money!</span>")
+						to_chat(user, "[bicon(src)]<span class='warning'>You don't have that much money!</span>")
 				else
-					to_chat(usr, "[bicon(src)]<span class='warning'>Unable to access account. Check security settings and try again.</span>")
+					to_chat(user, "[bicon(src)]<span class='warning'>Unable to access account. Check security settings and try again.</span>")
 			else
-				to_chat(usr, "[bicon(src)]<span class='warning'>EFTPOS is not connected to an account.</span>")
-	else
-		..()
+				to_chat(user, "[bicon(src)]<span class='warning'>EFTPOS is not connected to an account.</span>")
 
 	//emag?
