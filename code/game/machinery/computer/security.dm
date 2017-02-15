@@ -15,7 +15,6 @@
 	var/screen = null
 	var/datum/data/record/active1 = null
 	var/datum/data/record/active2 = null
-	var/a_id = null
 	var/temp = null
 	var/printing = null
 	var/can_change_id = 0
@@ -30,7 +29,7 @@
 
 /obj/machinery/computer/secure_data/attackby(obj/item/O, mob/user, params)
 	if(istype(O, /obj/item/weapon/card/id) && !scan)
-		usr.drop_item()
+		user.drop_item()
 		O.forceMove(src)
 		scan = O
 		ui_interact(user)
@@ -43,6 +42,7 @@
 	if(is_away_level(z))
 		to_chat(user, "<span class='danger'>Unable to establish a connection</span>: You're too far away from the station!")
 		return
+	add_fingerprint(user)
 	ui_interact(user)
 
 /obj/machinery/computer/secure_data/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
@@ -465,8 +465,6 @@
 						if(!t1 || incapable || active1 != a1)
 							return 1
 						active1.fields["species"] = t1
-
-	add_fingerprint(usr)
 	return 1
 
 /obj/machinery/computer/secure_data/proc/setTemp(text, list/buttons = list())
@@ -520,7 +518,7 @@
 				if(1)
 					R.fields["name"] = "[pick(pick(first_names_male), pick(first_names_female))] [pick(last_names)]"
 				if(2)
-					R.fields["sex"]	= pick("Male", "Female")
+					R.fields["sex"] = pick("Male", "Female")
 				if(3)
 					R.fields["age"] = rand(5, 85)
 				if(4)

@@ -18,7 +18,6 @@
 	var/screen = null
 	var/datum/data/record/active1 = null
 	var/datum/data/record/active2 = null
-	var/a_id = null
 	var/temp = null
 	var/printing = null
 
@@ -38,6 +37,7 @@
 	if(is_away_level(z))
 		to_chat(user, "<span class='danger'>Unable to establish a connection</span>: You're too far away from the station!")
 		return
+	add_fingerprint(user)
 	ui_interact(user)
 
 /obj/machinery/computer/med_data/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
@@ -519,8 +519,6 @@
 				P.info += "</TT>"
 				P.name = "paper- 'Medical Record'"
 				printing = 0
-
-	add_fingerprint(usr)
 	return 1
 
 /obj/machinery/computer/med_data/proc/setTemp(text, list/buttons = list())
