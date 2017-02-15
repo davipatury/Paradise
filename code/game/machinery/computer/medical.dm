@@ -200,6 +200,7 @@
 				if("del_r2")
 					if(active2)
 						qdel(active2)
+						active2 = null
 
 	if(href_list["scan"])
 		if(scan)

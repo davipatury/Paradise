@@ -17,9 +17,6 @@
 	var/datum/data/record/active2 = null
 	var/temp = null
 	var/printing = null
-	var/can_change_id = 0
-	var/list/Perp
-	var/tempname = null
 	//Sorting Variables
 	var/sortBy = "name"
 	var/order = 1 // -1 = Descending - 1 = Ascending
@@ -143,7 +140,7 @@
 				if("del_all2")
 					for(var/datum/data/record/R in data_core.security)
 						qdel(R)
-					temp = list("text" = "<h3>All records deleted.</h3>")
+					setTemp("<h3>All records deleted.</h3>")
 				if("del_r2")
 					if(active2)
 						qdel(active2)
@@ -153,8 +150,10 @@
 							if(R.fields["name"] == active1.fields["name"] && R.fields["id"] == active1.fields["id"])
 								qdel(R)
 						qdel(active1)
+						active1 = null
 					if(active2)
 						qdel(active2)
+						active2 = null
 					screen = SEC_DATA_R_LIST
 				if("criminal")
 					if(active2)
@@ -350,7 +349,7 @@
 					P.info += "<B>Security Record Lost!</B><BR>"
 				P.info += "</TT>"
 				P.name = "paper - 'Security Record'"
-				printing = null
+				printing = 0
 
 		else if(href_list["print_p"])
 			if(!printing)
@@ -359,7 +358,7 @@
 				sleep(50)
 				if(istype(active1, /datum/data/record) && data_core.general.Find(active1))
 					create_record_photo(active1)
-				printing = null
+				printing = 0
 
 		else if(href_list["add_c"])
 			if(istype(active2, /datum/data/record))
@@ -386,12 +385,16 @@
 						if(!t1 || !length(trim(t1)) || incapable || active1 != a1)
 							return 1
 						active1.fields["name"] = t1
+						if(istype(active2, /datum/data/record))
+							active2.fields["name"] = t1
 				if("id")
-					if(istype(active2, /datum/data/record))
+					if(istype(active1, /datum/data/record))
 						var/t1 = copytext(trim(sanitize(input("Please input id:", "Secure. records", active1.fields["id"], null) as text)), 1, MAX_MESSAGE_LEN)
 						if(!t1 || incapable || active1 != a1)
 							return 1
 						active1.fields["id"] = t1
+						if(istype(active2, /datum/data/record))
+							active2.fields["id"] = t1
 				if("fingerprint")
 					if(istype(active1, /datum/data/record))
 						var/t1 = copytext(trim(sanitize(input("Please input fingerprint hash:", "Secure. records", active1.fields["fingerprint"], null) as text)), 1, MAX_MESSAGE_LEN)
