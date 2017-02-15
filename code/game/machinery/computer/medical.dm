@@ -143,7 +143,6 @@
 	if(!data_core.medical.Find(active2))
 		active2 = null
 
-
 	if(href_list["temp"])
 		temp = null
 

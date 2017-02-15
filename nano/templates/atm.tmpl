@@ -16,13 +16,10 @@ For all your monetary needs!
 <i>This terminal is</i> {{:data.machine_id}}. <i>Report this code when contacting Nanotrasen IT Support</i>
 <br>
 
-<div class='itemLabel'>
-	Card:
+<div class="item">
+	<div class='itemLabel'>Card:</div>
+	<div class='itemContent'>{{:helper.link(data.held_card_name, 'eject', {'choice' : 'insert_card'})}}</div>
 </div>
-<div class='itemContent'>
-	{{:helper.link(data.held_card_name, 'eject', {'choice' : 'insert_card'})}}
-</div>
-<br>
 <hr>
 {{if data.ticks_left_locked_down > 0}}
 	<span class='exclamation-triangle'>Maximum number of pin attempts exceeded! Access to this ATM has been temporarily disabled.</span>
@@ -30,21 +27,37 @@ For all your monetary needs!
 	{{if data.view_screen == 1}} <!-- CHANGE_SECURITY_LEVEL -->
 		<h4>Select a new security level for this account:</h4>
 		<div class="item">
-			<div class="line">
-				{{:helper.link(data.zero_text, 'unlock', {'choice' : 'change_security_level', 'new_security_level' : 0}, data.security_level == 0 ? 'selected' : null)}}
-			</div>
-			<div class="line">
-				{{:helper.link(data.one_text, 'unlock-alt', {'choice' : 'change_security_level', 'new_security_level' : 1}, data.security_level == 1 ? 'selected' : null)}}
-			</div>
-			<div class="line">
-				{{:helper.link(data.two_text, 'lock', {'choice' : 'change_security_level', 'new_security_level' : 2}, data.security_level == 2 ? 'selected' : null)}}
-			</div>
+			<div class='itemLabel'>Level:</div>
+			<div class='itemContent'>{{:helper.link('Zero', 'unlock', {'choice' : 'change_security_level', 'new_security_level' : 0}, data.security_level == 0 ? 'selected' : null)}}</div>
 		</div>
-		<br><hr><br>
+		<div class="item">
+			<div class='itemLabel'>Description:</div>
+			<div class='itemContent'>Either the account number or card is required to access this account. EFTPOS transactions will require a card and ask for a pin, but not verify the pin is correct.</div>
+		</div>
+		<hr>
+		<div class="item">
+			<div class='itemLabel'>Level:</div>
+			<div class='itemContent'>{{:helper.link('One', 'unlock-alt', {'choice' : 'change_security_level', 'new_security_level' : 1}, data.security_level == 1 ? 'selected' : null)}}</div>
+		</div>
+		<div class="item">
+			<div class='itemLabel'>Description:</div>
+			<div class='itemContent'>An account number and pin must be manually entered to access this account and process transactions.</div>
+		</div>
+		<hr>
+		<div class="item">
+			<div class='itemLabel'>Level:</div>
+			<div class='itemContent'>{{:helper.link('Two', 'lock', {'choice' : 'change_security_level', 'new_security_level' : 2}, data.security_level == 2 ? 'selected' : null)}}</div>
+		</div>
+		<div class="item">
+			<div class='itemLabel'>Description:</div>
+			<div class='itemContent'>In addition to account number and pin, a card is required to access this account and process transactions.</div>
+		</div>
+		<hr>
 		{{:helper.link('Back', 'arrow-left', {'choice' : 'view_screen', 'view_screen' : 0})}}
 	{{else data.view_screen == 2}} <!-- TRANSFER_FUNDS -->
-		<b>Account balance:</b> ${{:data.money}}
-		<br><hr>
+		<div class='line'>
+			<b>Account balance:</b> ${{:data.money}}
+		</div>
 		<form name='transfer' action='?src={{:data.src}}' method='get'>
 			<input type='hidden' name='src' value='{{:data.src}}'>
 			<input type='hidden' name='choice' value='transfer'>
@@ -98,7 +111,7 @@ For all your monetary needs!
 		<form name='withdrawal' action='?src={{:data.src}}' method='get'>
 			<input type='hidden' name='src' value='{{:data.src}}'>
 			<input type='hidden' name='choice' value='withdrawal'>
-			<input type='text' name='funds_amount' value='' style='width:200px; background-color:white;'><input type='submit' value='Withdraw funds'><br>
+			<input type='text' name='funds_amount' value=''><input type='submit' value='Withdraw funds'><br>
 		</form>
 		<hr>
 		

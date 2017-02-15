@@ -160,9 +160,6 @@ log transactions
 		if(trx.len > 0)
 			data["transaction_log"] = trx
 
-	data["zero_text"] = "Zero - Either the account number or card is required to access this account. EFTPOS transactions will require a card and ask for a pin, but not verify the pin is correct."
-	data["one_text"] = "One - An account number and pin must be manually entered to access this account and process transactions."
-	data["two_text"] = "Two - In addition to account number and pin, a card is required to access this account and process transactions."
 	return data
 
 /obj/machinery/atm/Topic(var/href, var/href_list)
