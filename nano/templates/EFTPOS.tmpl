@@ -37,11 +37,7 @@
 		Linked account:
 	</div>
 	<div class='itemContent'>
-		{{if data.linked_account}}
-			<b>{{:helper.link(data.linked_account_owner_name, 'user', null, null, 'link infoButton')}}</b>
-		{{else}}
-			<b>{{:helper.link(None, 'close', null, null, 'link infoButton')}}</b>
-		{{/if}}
+		<b>{{:helper.link(data.linked_account ? data.linked_account : 'None', data.linked_account ? 'user' : 'user-times', null, null, 'link infoButton')}}</b>
 	</div>
 	<br><br>
 	<hr><br>
@@ -76,7 +72,7 @@
 	Linked account:
 	</div>
 	<div class='itemContent'>
-	{{:helper.link(data.linked_account ? data.linked_account_owner_name : 'None', data.linked_account ? 'user' : 'close', {'choice' : 'link_account'})}}
+	{{:helper.link(data.linked_account ? data.linked_account : 'None', data.linked_account ? 'user' : 'user-times', {'choice' : 'link_account'})}}
 	</div>
 	<br><br>
 	<hr>

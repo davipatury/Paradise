@@ -93,9 +93,7 @@
 	data["transaction_paid"] = transaction_paid
 	data["transaction_purpose"] = transaction_purpose
 	data["transaction_amount"] = transaction_amount
-	data["linked_account"] = linked_account
-	if(linked_account)
-		data["linked_account_owner_name"] = linked_account.owner_name
+	data["linked_account"] = linked_account ? linked_account.owner_name : null
 	return data
 
 /obj/item/device/eftpos/Topic(href, href_list)
