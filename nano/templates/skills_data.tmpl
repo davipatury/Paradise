@@ -1,6 +1,6 @@
 <!--
-Title: Security Records UI
-Used In File(s): \code\game\machinery\computer\security.dm
+Title: Employment Records UI
+Used In File(s): \code\game\machinery\computer\skills.dm
 -->
 
 <!--
@@ -79,7 +79,7 @@ Used In File(s): \code\game\machinery\computer\security.dm
 		</table>
 		<div class="statusDisplay" style="overflow: auto;">
 			<span id='maintable_data_archive'>
-				<table style='width: 100%; border-spacing: 0 2px;' id='maintable_data'>
+				<table style='width: 100%;' id='maintable_data'>
 					<thead>
 						<tr>
 							<th>{{:helper.link('Name', null, {'sort' : 'name'}, null, 'infoButton')}}</th>
@@ -132,9 +132,6 @@ Used In File(s): \code\game\machinery\computer\security.dm
 					</td>
 					<td valign='middle' align='center' style='width: 300px;'>
 						{{if data.general.has_photos}}
-							<div style="text-align: center;">
-								<div style="display: inline-block;">{{:helper.link('Print photo', 'camera', {'print_p' : 1})}}</div>
-							</div>
 							{{for data.general.photos}}
 								{{if value.photo}}
 									<img src={{:value.photo}} height=96 width=96 border=5>
@@ -155,7 +152,7 @@ Used In File(s): \code\game\machinery\computer\security.dm
 				</div>
 			</div>
 		{{/if}}
-		
+		<h3><center>Menu</center></h3>
 		<div class="line">{{:helper.link('Delete Record (All)', 'trash', {'del_rg' : 1})}}</div>
 		<div class="line">{{:helper.link('Print Record', 'print', {'print_r' : 1})}}</div>
 		<div class="line">{{:helper.link('Back', 'arrow-left', {'screen' : 1})}}</div>
