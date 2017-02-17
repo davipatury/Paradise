@@ -73,7 +73,7 @@
 
 	attack_hand(user)
 
-/obj/machinery/computer/account_database/attack_hand(mob/user as mob)
+/obj/machinery/computer/account_database/attack_hand(mob/user)
 	ui_interact(user)
 
 /obj/machinery/computer/account_database/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
