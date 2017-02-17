@@ -46,11 +46,11 @@ log transactions
 	if(stat & NOPOWER)
 		return
 
-	if(linked_db && ( (linked_db.stat & NOPOWER) || !linked_db.activated ) )
+	if(linked_db && (linked_db.stat & NOPOWER) || !linked_db.activated)
 		linked_db = null
 		authenticated_account = null
 		visible_message("[bicon(src)]<span class='warning'>[src] buzzes rudely, \"Connection to remote database lost.\"</span>")
-		updateDialog()
+		nanomanager.update_uis(src)
 
 	if(ticks_left_timeout > 0)
 		ticks_left_timeout--
@@ -91,6 +91,7 @@ log transactions
 			held_card = I
 			if(authenticated_account && held_card.associated_account_number != authenticated_account.account_number)
 				authenticated_account = null
+			nanomanager.update_uis(src)
 	else if(authenticated_account)
 		if(istype(I, /obj/item/weapon/spacecash))
 			//consume the money
@@ -112,7 +113,7 @@ log transactions
 			authenticated_account.transaction_log.Add(T)
 
 			to_chat(user, "<span class='info'>You insert [C] into [src].</span>")
-			attack_hand(user)
+			ui_interact(user)
 			qdel(I)
 	else
 		..()
@@ -121,11 +122,11 @@ log transactions
 	if(issilicon(user))
 		to_chat(user, "<span class='warning'>Artificial unit recognized. Artificial units do not currently receive monetary compensation, as per Nanotrasen regulation #1005.</span>")
 		return
-	if(get_dist(src, user) <= 1)
-		add_fingerprint(user)
-		ui_interact(user)
+	add_fingerprint(user)
+	ui_interact(user)
 
 /obj/machinery/atm/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+	user.set_machine(src)
 	ui = nanomanager.try_update_ui(user, src, ui_key, ui, force_open)
 	if (!ui)
 		ui = new(user, src, ui_key, "atm.tmpl", name, 550, 650)
@@ -322,6 +323,8 @@ log transactions
 						held_card = I
 			if("logout")
 				authenticated_account = null
+
+	nanomanager.update_uis(src)
 	return 1
 
 //create the most effective combination of notes to make up the requested amount
@@ -353,3 +356,4 @@ log transactions
 					authenticated_account.transaction_log.Add(T)
 
 					view_screen = NO_SCREEN
+					nanomanager.update_uis(src)

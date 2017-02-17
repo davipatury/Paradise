@@ -10,6 +10,20 @@ Used In File(s): /code/modules/economy/ATM.dm
 #define VIEW_TRANSACTION_LOGS		3
 -->
 
+<head>
+	<style type="text/css">
+		input[type=text], input[type=submit] {
+			border: 1px solid #161616;
+			background-color: #40628a !important;
+			color: #FFFFFF;
+			padding: 4px;
+		}
+		input[type=submit]:hover {
+			background-color: #507aac !important;
+		}
+	</style>
+</head>
+
 <h1>Nanotrasen Automatic Teller Machine</h1>
 For all your monetary needs!
 <br>
@@ -55,10 +69,8 @@ For all your monetary needs!
 		<hr>
 		{{:helper.link('Back', 'arrow-left', {'choice' : 'view_screen', 'view_screen' : 0})}}
 	{{else data.view_screen == 2}} <!-- TRANSFER_FUNDS -->
-		<div class='line'>
-			<b>Account balance:</b> ${{:data.money}}
-		</div>
-		<form name='transfer' action='?src={{:data.src}}' method='get'>
+		<div class='line'><b>Account balance:</b> ${{:data.money}}</div>
+		<form name='transfer' id='transfer' action='?src={{:data.src}}' method='get'>
 			<input type='hidden' name='src' value='{{:data.src}}'>
 			<input type='hidden' name='choice' value='transfer'>
 			<div class='itemLabel'>Target account number:</div>
@@ -74,8 +86,8 @@ For all your monetary needs!
 		<hr>
 		{{:helper.link('Back', 'arrow-left', {'choice' : 'view_screen', 'view_screen' : 0})}}
 	{{else data.view_screen == 3}} <!-- VIEW_TRANSACTION_LOGS -->
-		<b>Transaction logs</b><br>
-		{{:helper.link('Back', 'arrow-left', {'choice' : 'view_screen', 'view_screen' : 0})}}<br><br>
+		<h4>Transaction logs</h4>
+		<div class='item'>{{:helper.link('Back', 'arrow-left', {'choice' : 'view_screen', 'view_screen' : 0})}}</div>
 
 		<div class="statusDisplay" style="overflow: auto;">
 			{{if data.transaction_log}}
@@ -111,28 +123,16 @@ For all your monetary needs!
 		<form name='withdrawal' action='?src={{:data.src}}' method='get'>
 			<input type='hidden' name='src' value='{{:data.src}}'>
 			<input type='hidden' name='choice' value='withdrawal'>
-			<input type='text' name='funds_amount' value=''><input type='submit' value='Withdraw funds'><br>
+			<input type='text' name='funds_amount' value=''>  <input type='submit' value='Withdraw funds'><br>
 		</form>
 		<hr>
 		
 		<h3>Menu</h3>
-		<div class="item">
-			<div class="line">
-				{{:helper.link('Change account security level', 'lock', {'choice' : 'view_screen', 'view_screen' : 1})}}
-			</div>
-			<div class="line">
-				{{:helper.link('Make transfer', 'exchange', {'choice' : 'view_screen', 'view_screen' : 2})}}
-			</div>
-			<div class="line">
-				{{:helper.link('View transaction log', 'list', {'choice' : 'view_screen', 'view_screen' : 3})}}
-			</div>
-			<div class="line">
-				{{:helper.link('Print balance statement', 'print', {'choice' : 'balance_statement'})}}
-			</div>
-			<div class="line">
-				{{:helper.link('Logout', 'sign-out', {'choice' : 'logout'})}}
-			</div>
-		</div>
+		<div class="line">{{:helper.link('Change account security level', 'lock', {'choice' : 'view_screen', 'view_screen' : 1})}}</div>
+		<div class="line">{{:helper.link('Make transfer', 'exchange', {'choice' : 'view_screen', 'view_screen' : 2})}}</div>
+		<div class="line">{{:helper.link('View transaction log', 'list', {'choice' : 'view_screen', 'view_screen' : 3})}}</div>
+		<div class="line">{{:helper.link('Print balance statement', 'print', {'choice' : 'balance_statement'})}}</div>
+		<div class="line">{{:helper.link('Logout', 'sign-out', {'choice' : 'logout'})}}</div>
 	{{/if}}
 {{else data.linked_db}}
 	<form name='atm_auth' action='?src={{:data.src}}' method='get'>

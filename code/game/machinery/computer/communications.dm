@@ -77,15 +77,13 @@
 			if(istype(id))
 				crew_announcement.announcer = GetNameAndAssignmentFromId(id)
 
-		nanomanager.update_uis(src)
-		return
+		return 1
 
 	if(href_list["logout"])
 		authenticated = COMM_AUTHENTICATION_NONE
 		crew_announcement.announcer = ""
 		setMenuState(usr,COMM_SCREEN_MAIN)
-		nanomanager.update_uis(src)
-		return
+		return 1
 
 	if(!is_authenticated(usr))
 		return 1
