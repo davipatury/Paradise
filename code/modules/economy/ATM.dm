@@ -78,7 +78,7 @@ log transactions
 				authenticated_account.charge(-amount, null, "Credit deposit", terminal_id=machine_id, dest_name = "Terminal")
 
 /obj/machinery/atm/proc/reconnect_database()
-	for(var/obj/machinery/computer/account_database/DB in world) //Hotfix until someone finds out why it isn't in 'machines'
+	for(var/obj/machinery/computer/account_database/DB in machines) //Hotfix until someone finds out why it isn't in 'machines'
 		if(DB.z == z && !(DB.stat & NOPOWER) && DB.activated)
 			linked_db = DB
 			break
@@ -113,7 +113,7 @@ log transactions
 			authenticated_account.transaction_log.Add(T)
 
 			to_chat(user, "<span class='info'>You insert [C] into [src].</span>")
-			ui_interact(user)
+			nanomanager.update_uis(src)
 			qdel(I)
 	else
 		..()

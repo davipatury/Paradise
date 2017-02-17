@@ -69,7 +69,7 @@ For all your monetary needs!
 		<hr>
 		{{:helper.link('Back', 'arrow-left', {'choice' : 'view_screen', 'view_screen' : 0})}}
 	{{else data.view_screen == 2}} <!-- TRANSFER_FUNDS -->
-		<div class='line'><b>Account balance:</b> ${{:data.money}}</div>
+		<div class='line'><b>Account balance:</b> ${{:helper.smoothRound(data.money)}}</div>
 		<form name='transfer' id='transfer' action='?src={{:data.src}}' method='get'>
 			<input type='hidden' name='src' value='{{:data.src}}'>
 			<input type='hidden' name='choice' value='transfer'>
@@ -119,7 +119,7 @@ For all your monetary needs!
 		</div>
 	{{else}} <!-- NO_SCREEN -->
 		Welcome, <b>{{:data.owner_name}}</b>.<br>
-		<b>Account balance:</b> ${{:data.money}}
+		<b>Account balance:</b> ${{:helper.smoothRound(data.money)}}
 		<form name='withdrawal' action='?src={{:data.src}}' method='get'>
 			<input type='hidden' name='src' value='{{:data.src}}'>
 			<input type='hidden' name='choice' value='withdrawal'>
